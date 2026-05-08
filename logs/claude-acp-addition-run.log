@@ -1,0 +1,7 @@
+创建了以下文件：
+
+- `scripts/add.py` — 加法计算脚本，支持命令行传入两个数字
+- `scripts/test_add.py` — 使用 `unittest` 编写的测试脚本，覆盖整数、浮点数、负数和零的情况
+
+测试结果：4 个测试全部通过（`OK`）。命令行示例 `python add.py 3 5` 输出 `8.0`。
+[acpx] tokens: input=5889 output=764 cache_read=104448 cache_write=0 total=111101

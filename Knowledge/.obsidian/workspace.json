@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Notes/AlphaEvolve A Coding Agent for Algorithmic Discovery.md",
-                "mode": "source",
+                "file": "notd_in/钟连珍-逐字稿文本-1.md",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "AlphaEvolve A Coding Agent for Algorithmic Discovery"
+              "title": "钟连珍-逐字稿文本-1"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 419.5
+    "width": 349.5
   },
   "right": {
     "id": "07cad9d9a2f7331d",
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Notes/AlphaEvolve A Coding Agent for Algorithmic Discovery.md",
+                "file": "Notes/AutoResearchClaw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "AlphaEvolve A Coding Agent for Algorithmic Discovery 的反向链接列表"
+              "title": "AutoResearchClaw 的反向链接列表"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Notes/AlphaEvolve A Coding Agent for Algorithmic Discovery.md",
+                "file": "Notes/AutoResearchClaw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "AlphaEvolve A Coding Agent for Algorithmic Discovery 的出链列表"
+              "title": "AutoResearchClaw 的出链列表"
             }
           },
           {
@@ -156,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Notes/AlphaEvolve A Coding Agent for Algorithmic Discovery.md",
+                "file": "Notes/AutoResearchClaw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "AlphaEvolve A Coding Agent for Algorithmic Discovery 的大纲"
+              "title": "AutoResearchClaw 的大纲"
             }
           }
         ]
@@ -185,41 +185,42 @@
   },
   "active": "741d1ea67ad87a0e",
   "lastOpenFiles": [
+    "Links/Links.md",
+    "notd_in/钟连珍-逐字稿文本-1.md",
+    "Notes/acpx 作为 ACP 编程 Agent 调度器.md",
+    "notd_in/钟连珍-逐字稿文本-1.txt",
+    "notd_in/20260507164739-转写_【视频面试】钟连珍-高级算法工程师-逐字稿文本-1.txt",
+    "notd_in",
+    "MOCs/AI自我迭代研究范式：Autoresearch技术全景与产业洞察.md",
+    "Daily/2026-05-08.md",
+    "Notes/美团智能客服技术框架.md",
+    "Daily/2026-05-07.md",
+    "MOCs/MOCs.md",
+    "Notes/国内智能客服调研.md",
+    "Index.md",
+    "Daily/2026-05-06.md",
+    "Manual.md",
+    "Codex.md",
+    "未命名.base",
+    "SKILL评估机制标准与执行流程.md",
+    "AI提效分享机制框架.md",
+    "AI提效分享机制-精简版.md",
+    "Papers/Higher Satisfaction, Lower Cost- A Technical Report on How LLMs Revolutionize Meituan’s Intelligent Interaction Systems.pdf",
+    "调研/调研.md",
+    "调研/中国四大平台智能客服系统最新技术进展与应用深度解析.pdf",
+    "调研",
     "Notes/AutoResearchClaw.md",
-    "Notes/Bilevel Autoresearch Meta-Autoresearching Itself.md",
+    "Papers/Self-Evolving AI Agents Survey.pdf",
     "Notes/Self-Evolving AI Agents Survey.md",
+    "Notes/Bilevel Autoresearch Meta-Autoresearching Itself.md",
+    "Notes/AlphaEvolve A Coding Agent for Algorithmic Discovery.md",
     "Notes/HyperAgents Meta-Level Self-Modifiable Agents.md",
     "Notes/Ranking Engineer Agent REA.md",
     "Notes/SWE-RL Self-Play Reinforcement Learning for Software Engineering.md",
-    "未命名.base",
     "Papers/Bilevel Autoresearch Meta-Autoresearching Itself.pdf",
-    "MOCs/AI自我迭代研究范式：Autoresearch技术全景与产业洞察.md",
     "Notes/Autoresearch.md",
     "Notes/Bilevel Autoresearch.md",
-    "Notes/递归自我改进.md",
-    "Notes/自主研究系统的安全护栏.md",
-    "Papers/Papers.md",
-    "Notes/AlphaEvolve A Coding Agent for Algorithmic Discovery.md",
-    "Daily/2026-04-29.md",
-    "Index.md",
     "Papers/AlphaEvolve A Coding Agent for Algorithmic Discovery.pdf",
-    "Papers/Self-Play Reinforcement Learning for Software Engineering.pdf",
-    "Papers/Self-Evolving AI Agents Survey.pdf",
-    "Papers/HyperAgents Meta-Level Self-Modifiable Agents.pdf",
-    "Papers/AutoResearchClaw README.md",
-    "Papers/Ranking Engineer Agent REA Meta Engineering.html",
-    "Papers",
-    "MOCs/MOCs.md",
-    "AI自我迭代研究范式：Autoresearch技术全景与产业洞察.md",
-    "Notes/Bilevel Autoresearch 论文笔记.md",
-    "MOCs/Autoresearch MOC.md",
-    "Inbox/autoresearch_tech_survey.md",
-    "Inbox/Bilevel Autoresearch Meta-Autoresearching Itself.md",
-    "Links/Bilevel Autoresearch 论文.md",
-    "Links/Bilevel Autoresearch Meta-Autoresearching Itself.md",
-    "未命名 1.base",
-    "Codex.md",
-    "未命名.canvas",
-    "Clippings"
+    "未命名.canvas"
   ]
 }

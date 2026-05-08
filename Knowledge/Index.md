@@ -11,12 +11,14 @@
 - [[MOCs/MOCs|MOCs]]
 - [[Daily/Daily|Daily]]
 - [[Papers/Papers|Papers]]
+- [[调研/调研|调研]]
 
 ## 使用节奏
 
 - 随手记录：新想法、链接、问题先进入 [[Inbox/Inbox|Inbox]]。
 - 每日回顾：当天的零散观察写入 [[Daily/Daily|Daily]]。
 - 每周整理：把 Inbox 中有价值的内容改写到 Notes、Links、Projects 或 MOCs。
+- 深度调研：把 DeepResearch 长文和行业横向分析放入 [[调研/调研|调研]]，再拆解成长期笔记。
 - 定期沉淀：把反复出现的问题整理成长期笔记或主题地图。
 
 ## 最近关注

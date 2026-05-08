@@ -18,6 +18,9 @@
 - [[SWE-RL Self-Play Reinforcement Learning for Software Engineering]]
 - [[Ranking Engineer Agent REA]]
 - [[AlphaEvolve A Coding Agent for Algorithmic Discovery]]
+- [[美团智能客服技术框架]]
+- [[国内智能客服调研]]
+- [[acpx 作为 ACP 编程 Agent 调度器]]
 
 ## 可继续打磨
 

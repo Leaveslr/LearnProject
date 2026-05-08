@@ -17,4 +17,5 @@
 - `MOCs/`：主题索引
 - `Daily/`：每日记录
 - `Papers/`：下载的论文 PDF、官方 README 和网页快照
+- `调研/`：大模型 DeepResearch 文章、行业调研和横向分析报告
 - `Templates/`：笔记模板

@@ -8,17 +8,17 @@
 
 ## 摘要
 
-2026年3月，Andrej Karpathy开源的`autoresearch`项目（630行Python代码）引爆了AI研究自动化的浪潮。这一范式通过AI代理自主执行"提出假设-修改代码-运行实验-评估保留"的闭环循环，将研究速度从人类时间尺度（天/周）推向机器时间尺度（分钟/小时）。此后一个月内，学术界与工业界密集涌现突破性进展：从双层元递归框架（5倍性能提升）到Anthropic的自动化对齐研究员（AAR），从HyperAgents的跨领域机制迁移到Meta REA的生产级部署，从SWE-RL的自博弈强化学习到AlphaEvolve的进化式算法发现，Autoresearch正从概念验证快速迈向工程实践与产业化部署。本报告系统梳理该范式的技术架构、关键变体、产业动态与安全挑战，为技术决策提供全景参考。
+2026年3月，Andrej Karpathy开源的`autoresearch`项目（630行Python代码）引爆了AI研究自动化的浪潮。这一范式通过AI代理自主执行"提出假设-修改代码-运行实验-评估保留"的闭环循环，将研究速度从人类时间尺度（天/周）推向机器时间尺度（分钟/小时）。此后一个月内，学术界与工业界密集涌现突破性进展：从双层元递归框架（5倍性能提升）到Anthropic的AAR（Automated Alignment Researcher，自动化对齐研究员），从HyperAgents的跨领域机制迁移到Meta REA（Ranking Engineer Agent，排序工程师智能体）的生产级部署，从SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习）到AlphaEvolve的进化式算法发现，Autoresearch正从概念验证快速迈向工程实践与产业化部署。本报告系统梳理该范式的技术架构、关键变体、产业动态与安全挑战，为技术决策提供全景参考。
 
 ---
 
-> **阅读建议**：本文档采用"总览→深度→关系"的三层结构。建议技术管理者优先阅读第1、2、8章；技术执行者深入第4、5章；安全与治理关注者聚焦第6章。
+> **阅读建议**：本文档采用"总览→深度→关系"的三层结构。建议技术管理者优先阅读第1、3、8章；技术执行者深入第4、5章；安全与治理关注者聚焦第6章。
 
 ## 1. 范式起源：从"肉脑"到自主AI代理
 
 ### 1.1 Karpathy的极简主义实验
 
-2026年3月7日，前Tesla AI总监、OpenAI创始成员Andrej Karpathy在GitHub发布了`autoresearch`项目。这一仅含630行Python代码、三个核心文件（`program.md` + `train.py` + `prepare.py`）的极简系统，在数天内获得超过75,000星标，成为AI研究自动化领域的标志性事件。
+2026年3月7日，前Tesla AI总监、OpenAI创始成员Andrej Karpathy在GitHub发布了`autoresearch`项目。这一仅含630行Python代码、三个核心文件（`program.md` + `train.py` + `prepare.py`）的极简系统，在数天内获得超过75,000星标，成为AI研究自动化方向的重要传播节点。
 
 其核心设计哲学可概括为**"one GPU, one file, one metric"**：
 
@@ -48,66 +48,307 @@ Autoresearch的技术内核是一个严格的"棘轮"（ratchet）循环：每�
 
 ---
 
-## 2. 方法论演进：自我改进的四阶段跃迁
+## 2. 之前的研究：Self-Evolving Agents作为Autoresearch的前置谱系
 
-Autoresearch的方法论发展并非一蹴而就，而是在短短数月内经历了从**单层闭环实验**到**元递归优化**、再到**跨域元迁移**、最终走向**规模化生产部署**的快速跃迁。以下四个阶段构成了该领域清晰的方法论演进主线。
+Karpathy的`autoresearch`让"AI代理自己做实验"变成了一个可运行、可复现、可传播的极简样板；但从研究谱系看，它并不是凭空出现的孤立发明，而是落在更早的**Self-Evolving AI Agents（自演化智能体）**问题域之中。Self-Evolving AI Agents Survey将这一领域定义为：智能体系统通过与环境交互，持续、系统地优化自身内部组件，以适应任务、上下文和资源变化，同时保持安全与性能。
+
+> 本章参考本地资料：[[Self-Evolving AI Agents Survey]] 与 [[Self-Evolving AI Agents Survey.pdf|论文PDF]]。
+
+这一定义把Autoresearch从"自动调参脚本"提升为一个更大的问题：
+
+```text
+一个AI系统中，哪些组件可以被改？
+谁来判断改得好不好？
+用什么反馈来驱动下一轮修改？
+怎样保证越改越强，而不是越改越偏？
+```
+
+### 2.1 统一闭环：输入、Agent、环境、优化器
+
+Survey提出的核心抽象是四组件反馈闭环：
+
+```text
+System Inputs → Agent System → Environment → Optimiser → 更新System Inputs或Agent System → 下一轮
+```
+
+这个框架为Autoresearch提供了前置分析语言。放到Karpathy的系统中，对应关系非常直接：
+
+| Survey框架 | Autoresearch中的对应物 | 作用 |
+|---|---|---|
+| System Inputs | `program.md`、训练目标、实验预算、可修改边界 | 定义研究问题和约束 |
+| Agent System | LLM代理 + 代码修改循环 + Git棘轮机制 | 执行假设生成、代码修改和决策保留 |
+| Environment | `train.py`运行结果、`val_bpb`等评估指标 | 提供可验证反馈 |
+| Optimiser | Large Language Model proposal（LLM proposal，大语言模型提案）、保留/回退规则、后续Bilevel中的机制生成器 | 决定下一轮如何改 |
+
+因此，Autoresearch的关键不只是"让模型写代码"，而是把研究活动压缩成一个可机器执行的闭环：输入边界清晰、被优化对象明确、环境反馈可量化、优化器能持续提出修改。
+
+**Figure 3的Markdown抽象：自演化四组件闭环**
+
+```mermaid
+flowchart LR
+    I["System Inputs<br/>系统输入：任务、数据、约束、资源"] --> A["Agent System<br/>智能体系统：Large Language Model（LLM，大语言模型）、Prompt、Memory、Tools、Workflow"]
+    A --> E["Environment<br/>环境：Benchmark、代码执行、Graphical User Interface（GUI，图形界面）、业务系统"]
+    E --> O["Optimiser<br/>搜索空间 + 优化算法"]
+    O --> I
+    O --> A
+
+    E -.反馈信号.-> O
+    O -.更新输入边界.-> I
+    O -.更新Agent组件.-> A
+```
+
+放到Autoresearch语境中，这张图可以进一步压缩为：
+
+```mermaid
+flowchart LR
+    P["program.md<br/>研究目标与约束"] --> R["Research Agent<br/>研究智能体：提出假设并修改train.py"]
+    R --> T["Experiment Environment<br/>实验环境：运行训练与评估validation bits per byte（val_bpb，验证集比特每字节）"]
+    T --> D["Decision Rule<br/>决策规则：指标改善则保留，否则回退"]
+    D --> P
+    D --> R
+
+    D -.Git commit.-> R
+    D -.rollback.-> R
+```
+
+### 2.2 可演化对象：从Prompt到完整工作流
+
+Self-Evolving Agents的研究对象远宽于模型权重更新。Survey将可演化对象拆成多个层次：
+
+| 可演化组件 | 典型方法 | 对Autoresearch的启发 |
+|---|---|---|
+| 基础模型行为 | Supervised Fine-Tuning（SFT，监督微调）、Reinforcement Learning（RL，强化学习）、test-time scaling、自我对齐 | 研究代理本身可以通过任务轨迹变强 |
+| Prompt | 自动提示优化、文本梯度、进化式prompt搜索 | `program.md`可以成为可优化对象 |
+| Memory | 短期摘要、长期经验库、失败案例回放 | 实验历史不只是日志，而是搜索策略的燃料 |
+| Tool Use | 工具选择、工具说明优化、工具创建 | 代理可以扩展自己的实验和分析能力 |
+| Workflow | 任务分解、执行顺序、多阶段流水线 | 从单轮实验走向idea-to-paper全流程 |
+| Multi-Agent Topology | 角色分工、通信图、动态协作结构 | 从单代理扩展到研究团队式代理系统 |
+
+这解释了为什么后续Autoresearch很快从单文件实验扩展到Bilevel、HyperAgents、AutoResearchClaw和REA：一旦"可修改对象"从代码参数扩大到prompt、记忆、工具、工作流和多代理结构，系统的改进空间就从局部调参跃迁为机制级进化。
+
+**Figure 4/5/6的Markdown抽象：可演化对象地图**
+
+```mermaid
+flowchart TB
+    SE["Self-Evolving Agent System"] --> SA["Single-Agent Optimisation"]
+    SE --> MA["Multi-Agent Optimisation"]
+    SE --> EV["Evaluation & Safety"]
+
+    SA --> LLM["LLM Behaviour<br/>Large Language Model（LLM，大语言模型）行为<br/>Supervised Fine-Tuning（SFT，监督微调） / Reinforcement Learning（RL，强化学习） / Test-time Scaling"]
+    SA --> PR["Prompt<br/>自动提示优化 / 文本梯度 / 进化搜索"]
+    SA --> MEM["Memory<br/>摘要压缩 / 长期记忆 / 经验回放"]
+    SA --> TOOL["Tools<br/>工具选择 / 工具说明 / 工具创建"]
+
+    MA --> ROLE["Role Allocation<br/>角色分工"]
+    MA --> TOPO["Topology<br/>层级式 / 中心式 / 图结构 / 动态拓扑"]
+    MA --> COMM["Communication<br/>通信协议 / 消息格式 / 触发时机"]
+    MA --> FLOW["Workflow<br/>任务分解 / 执行顺序 / 多阶段流水线"]
+
+    EV --> SAFE["Endure<br/>安全适应：安全、稳定、可回滚"]
+    EV --> PERF["Excel<br/>性能保持：性能不退化"]
+    EV --> AUTO["Evolve<br/>自主进化：自主优化"]
+```
+
+### 2.3 三条约束：Endure、Excel、Evolve
+
+Survey提出的三条设计约束可以视为自演化系统的护栏：
+
+| 原则 | 含义 | 在Autoresearch中的体现 |
+|---|---|---|
+| **Endure（Safety Adaptation，安全适应）** | 修改过程中保持安全和稳定 | Git回滚、锁定评估器、沙箱运行、预算限制 |
+| **Excel（Performance Preservation，性能保持）** | 新版本性能不低于旧版本 | 只有指标改善才保留，失败实验自动回退 |
+| **Evolve（Autonomous Evolution，自主进化）** | 在前两者约束下自主优化内部组件 | 代理持续生成假设、修改代码、积累策略 |
+
+优先级是`Endure（Safety Adaptation，安全适应） > Excel（Performance Preservation，性能保持） > Evolve（Autonomous Evolution，自主进化）`。这点对产业部署尤其关键：自主进化不是无约束的"越自动越好"，而是在安全和性能不退化的前提下释放搜索能力。REA的预检清单、A/B测试、预算确认，AutoResearchClaw的HITL模式，本质上都是对这三条约束的工程化落地。
+
+### 2.4 从MOP到MASE：Autoresearch所处的历史位置
+
+Survey将LLM系统演进划分为四个阶段：
+
+| 阶段 | 名称 | 核心特征 |
+|---|---|---|
+| MOP | Model Offline Pretraining（模型离线预训练） | 静态数据上预训练，部署后基本冻结 |
+| MOA | Model Online Adaptation（模型在线适配） | 部署后通过Supervised Fine-Tuning（SFT，监督微调）、Low-Rank Adaptation（LoRA，低秩适配）、Reinforcement Learning from Human Feedback（RLHF，基于人类反馈的强化学习）等方式适配 |
+| MAO | Multi-Agent Orchestration（多智能体编排） | 多Agent协作，但结构主要由人设计 |
+| MASE | Multi-Agent Self-Evolving（多智能体自演化） | 多Agent系统根据环境反馈持续优化自身 |
+
+Autoresearch可以被视为MASE方向在"科研与工程实验"场景中的高密度实现：它把模型、代码、实验环境、评估指标和版本控制组织成一个持续改进系统。也就是说，Karpathy的贡献不是提出"自演化"这个宏观概念，而是给出了一个极简、低摩擦、可复制的样板，让Self-Evolving Agents从综述框架落到研究者电脑上的可运行循环。
+
+**Figure 1的Markdown抽象：从静态模型到自演化系统**
+
+```mermaid
+flowchart LR
+    MOP["MOP<br/>Model Offline Pretraining（模型离线预训练）<br/>静态数据预训练，部署后冻结"]
+    MOA["MOA<br/>Model Online Adaptation（模型在线适配）<br/>部署后用反馈做适配"]
+    MAO["MAO<br/>Multi-Agent Orchestration（多智能体编排）<br/>多Agent协作，但结构由人设计"]
+    MASE["MASE<br/>Multi-Agent Self-Evolving（多智能体自演化）<br/>系统根据环境反馈持续改造自身"]
+
+    MOP --> MOA --> MAO --> MASE
+
+    MOP -.核心限制.-> S1["缺少在线适应"]
+    MOA -.核心限制.-> S2["适配对象有限"]
+    MAO -.核心限制.-> S3["协作结构仍主要靠人设计"]
+    MASE -.核心能力.-> S4["Prompt / Memory / Tools / Workflow / Topology持续演化"]
+```
+
+### 2.5 对后文的承接
+
+有了Self-Evolving Agents的前置框架，后文的Autoresearch演进主线可以更清楚地理解：
+
+- Karpathy单层闭环：确定了四组件循环的最小可行形态。
+- Bilevel Autoresearch：把Optimiser本身也纳入可演化对象。
+- HyperAgents：让元级技能跨领域迁移，突破单任务自我改进边界。
+- AutoResearchClaw：把工作流从单次实验扩展到idea-to-paper。
+- REA（Ranking Engineer Agent，排序工程师智能体）：把Endure（Safety Adaptation，安全适应）、Excel（Performance Preservation，性能保持）、Evolve（Autonomous Evolution，自主进化）工程化到真实生产系统。
+- AlphaEvolve与SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习）：分别展示进化式搜索和自博弈奖励信号如何扩展Autoresearch的能力边界。
+
+因此，本章的作用是提供"之前的研究"这一底座：Self-Evolving Agents定义了问题空间，Autoresearch则是在这个问题空间中最具传播力和工程牵引力的具体范式。
+
+### 2.6 关键问题：为什么Autoresearch让这个领域突然发展起来？
+
+**问题**：Self-Evolving Agents之前已经有研究了，为什么`autoresearch`出来后把这个领域发展起来了？是因为大模型能力提升了吗？
+
+**回答**：是的，大模型能力提升是核心原因之一，但真正的变化是"能力 + 工程闭环"同时成熟。Self-Evolving Agents早就定义了问题空间；`autoresearch`则给出了一个低门槛、可复现、可验证的最小运行样板。
+
+关键原因可以压缩为五点：
+
+1. **LLM能力足够稳定**：模型开始能跨环节完成读历史、提假设、改代码、跑实验、看指标、回滚修复。
+2. **代码成为可修改载体**：自我改进不再是抽象概念，而是落到`train.py`这类具体文件上。
+3. **指标提供外部裁判**：validation bits per byte（val_bpb，验证集比特每字节）、loss、训练速度等硬指标让系统知道"是否真的变好"。
+4. **极简样板降低传播门槛**：`program.md` + `train.py` + `prepare.py` + Git棘轮，把宏大的自演化问题压缩成几百行可运行代码。
+5. **Agent工具链成熟**：Git、沙箱、自动评测、CI（Continuous Integration，持续集成）、Claude Code、Codex CLI、OpenCode等工具让长流程自动实验更自然。
+
+所以，Autoresearch的爆发不是单一原因，而是多个条件叠加：
+
+```text
+更强的LLM
++ 可修改代码对象
++ 可验证指标
++ Git / 沙箱 / 自动实验工具链
++ Karpathy的极简可复现范式
+= Autoresearch把Self-Evolving Agents推向工程实践
+```
+
+一句话总结：**Self-Evolving Agents定义了问题空间；Autoresearch给出了最小可运行证明，并且正好赶上大模型代码能力和agent工具链成熟。**
 
 ---
 
-### 2.1 第一阶段：单层闭环（Karpathy, 2026.03）——从"人肉调参"到代理自主实验
+## 3. 方法论演进：用一个例子看清演进方向
 
-**核心思想**：将研究流程中最耗时的"提出假设-修改代码-运行实验-评估结果"循环完全委托给AI代理，人类仅通过自然语言Markdown指令（`program.md`）设定研究目标与约束。
+第3章不逐篇展开论文细节，而是回答一个更核心的问题：Autoresearch为什么会从"让AI跑实验"迅速扩展成一个完整的自我改进方法论？最清楚的方式，是用同一个任务贯穿演进链条。
 
-**关键机制**：九步"棘轮"循环——读取计划→审视现状→假设生成→代码实现→版本控制→执行训练→故障处理→结果评估→决策保留。每次成功添加Git提交，失败则自动回退，代码库只进不退。
+假设目标是：
 
-**里程碑数据**：700次实验/2天、20+有效改进、训练效率提升11%。
+```text
+优化一个小型语言模型的训练效率，
+在验证集val_bpb（validation bits per byte，验证集比特每字节）不变差的前提下减少训练时间。
+```
 
-**结构性瓶颈**：约700次实验中仅20+有效改进，LLM的保守偏见（倾向于依赖预训练先验中的"标准"方案）导致搜索轨迹高度确定性，陷入局部最优陷阱。
+### 3.1 一个任务的四次升级
 
----
+```mermaid
+flowchart LR
+    A["1. 执行研究<br/>AI自己提出改动、跑实验、保留结果"] --> B["2. 优化研究方法<br/>AI分析搜索历史，改进自己的搜索策略"]
+    B --> C["3. 迁移研究方法<br/>把有效搜索经验抽象成通用元技能"]
+    C --> D["4. 生产化研究<br/>接入真实实验平台、预算、人类审批和长期运行"]
 
-### 2.2 第二阶段：元递归优化（Qu & Lu, 2026.03）——从"AI做研究"到"AI研究如何做研究"
+    A -.代表.-> P1["Karpathy autoresearch"]
+    B -.代表.-> P2["Bilevel Autoresearch"]
+    C -.代表.-> P3["HyperAgents"]
+    D -.代表.-> P4["REA"]
+```
 
-**核心思想**：借鉴双层优化（Bilevel Optimization）数学框架，将Autoresearch的方法论本身作为研究对象。内层循环优化任务性能（代码级参数调整），外层循环优化搜索机制本身（策略级机制发现）。
+**第一步：AI执行研究。**  
+最小闭环只做一件事：让AI自动完成"提出假设-修改代码-运行实验-评估保留"。
 
-**关键突破**：引入**Level 2 机制设计层**，通过4轮结构化研究会话（Explore→Critique→Specify→Generate）自主生成Python搜索机制并在运行时注入，从根本上改变内层循环的搜索行为模式。
+```text
+读取program.md
+  → 提出一个改动：把AdamW beta2从0.999改为0.95
+  → 修改train.py
+  → 跑300秒训练
+  → 对比val_bpb和训练速度
+  → 指标更好就commit，否则rollback
+```
 
-**里程碑数据**：完整双层架构实现**5倍性能提升**（val_bpb从-0.009改善至-0.045），且使用与内层相同的LLM——改进完全来源于架构设计而非更强模型。
+这一步的意义是证明：研究循环可以被机器时间压缩。但它的短板也很明显：代理可能反复尝试学习率、batch size、dropout等常见方向，几百轮之后只有少量有效改进。
 
-**与第一阶段的递进**：从"代理执行研究"升级为"代理优化研究的方法论本身"。参数级调整无可靠增益，机制级变更显著提效——证明了**机制创新的不可替代性**。
+**第二步：AI优化研究方法。**  
+下一步不是继续让代理盲目试参数，而是让它反思"自己为什么搜得不够好"。
 
----
+```text
+内层循环：
+  继续尝试训练参数和代码改动
 
-### 2.3 第三阶段：跨域元迁移（HyperAgents, 2026.03）——从特定领域到通用元技能
+外层循环：
+  分析最近几十次实验历史
+  发现代理过度探索学习率，忽略归一化和初始化策略
+  生成新的搜索调度机制
+  把搜索预算转向更有潜力的方向
+```
 
-**核心思想**：将元级自我改进技能（记忆管理、提示工程、探索策略、性能跟踪）发展为**领域通用**的能力，使其可以跨领域迁移并在全新场景中复现。
+这里的跃迁点是：被优化对象从`train.py`里的训练策略，扩大到"Autoresearch runner自己的搜索机制"。这就是Bilevel Autoresearch代表的方向。
 
-**关键突破**：元级过程本身可编辑。先前系统的自我改进受限于领域对齐——在一个领域学到的策略难以迁移到新领域。HyperAgents通过发展领域通用的元级技能解决了这一瓶颈。
+**第三步：AI迁移研究方法。**  
+当系统在语言模型训练任务中学到有效搜索策略后，下一个问题是：这些策略能不能迁移到新任务？
 
-**里程碑数据**：在Olympiad数学评分（全新领域）上获得imp@50=0.630，而人类专家为同一任务手工设计的系统得分**0.0**（完全失败）。
+```text
+从语言模型训练任务中学到：
+  - 不要反复探索已经低收益的参数族
+  - 对高方差实验保留复测预算
+  - 用失败案例更新下一轮假设生成提示
 
-**与第二阶段的递进**：从"在单一任务内优化搜索机制"升级为"将元改进技能跨领域迁移"。Bilevel解决的是"搜索效率"，HyperAgents解决的是"迁移通用性"。
+迁移到新任务：
+  - 代码修复agent
+  - 数学评分agent
+  - 推荐模型排序实验
+```
 
----
+这时自我改进不再局限于某个训练脚本，而是变成一组可迁移的元技能，例如探索/利用平衡、历史经验压缩、失败模式记忆、候选方案排序。HyperAgents代表的就是这个方向。
 
-### 2.4 第四阶段：规模化生产（REA, 2026.03）——从实验室到产业部署
+**第四步：AI在生产系统中持续研究。**  
+进入真实业务环境后，问题从"能不能找到好改动"变成"能不能长期、安全、可审计地运行"。
 
-**核心思想**：将自主实验代理部署于真实的工业级生产系统，处理跨天/跨周的异步工作流，并建立与人类团队深度协作的人机混合模式。
+```text
+Day 1:
+  生成实验假设
+  人类确认预算和风险
+  提交训练任务
+  进入hibernate休眠
 
-**关键突破**：
-- **Hibernate-and-Wake机制**：代理在实验等待期间进入休眠状态，结果就绪后自动唤醒继续，实现跨天/跨周的自主性
-- **Dual-Source假设生成**：历史实验洞察数据库 + ML研究代理双源输入，生成更丰富的实验假设
-- **Three-Phase Planning框架**：Validation→Combination→Exploitation的渐进式探索策略
+Day 3:
+  实验结果返回
+  自动wake唤醒
+  分析收益、成本和副作用
+  如果收益不足，生成下一轮更保守的实验
+  如果收益可靠，提交给人类做上线审批
+```
 
-**里程碑数据**：3名工程师驱动REA完成原本16人的工作量，广告排序模型精度提升**2倍**，工程产出提升**5倍**。
+这时Autoresearch已经从本地实验脚本，变成了能接入组织知识库、实验平台、预算系统和人类审批流的生产级研究代理。REA代表的是这条工程化路线。
 
-**与前三阶段的递进**：前三阶段解决的是"搜索什么"和"如何搜索"，第四阶段解决的是"如何在真实生产环境中持续、可靠、安全地运行"。从算法创新走向工程产品化。
+### 3.2 论文方向在演进链条中的位置
 
----
+| 演进方向 | 解决的问题 | 代表工作 | 在链条中的角色 |
+|---|---|---|---|
+| 单层闭环实验 | 让AI自己完成一轮可验证实验 | Karpathy `autoresearch` | 最小可运行证明 |
+| 机制级自优化 | 让AI改进"如何搜索" | Bilevel Autoresearch | 从参数搜索升级到搜索机制生成 |
+| 统一理论框架 | 给自演化Agent提供共同语言和护栏 | Self-Evolving AI Agents Survey | 解释System Inputs、Agent System、Environment、Optimiser和三条约束 |
+| 全流程研究平台 | 从单次实验扩展到idea-to-paper | AutoResearchClaw | 把实验闭环扩成科研流水线 |
+| 跨域元技能迁移 | 让改进经验跨任务复用 | HyperAgents | 从单任务优化走向通用元能力 |
+| 自博弈训练信号 | 在缺少人工标注时生成训练数据 | SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习） | 为代码类Autoresearch提供对抗性反馈 |
+| 生产级部署 | 在真实业务系统中长期运行 | REA（Ranking Engineer Agent，排序工程师智能体） | 解决异步实验、预算、安全、人类协作 |
+| 算法发现扩展 | 从调参扩展到新算法发现 | AlphaEvolve | 把Autoresearch推向算法设计空间 |
 
-### 2.5 演进主线：从MOP到MASE的范式转移
+因此，第3章的核心逻辑可以压缩成一句话：
 
-上述四阶段跃迁共同指向一个更大的范式转移——从**MOP（Model-Once-Deploy，一次性训练部署）**向**MASE（Model-Auto-Self-Evolving，模型自动自我进化）**的时代性转变。
+```text
+Autoresearch的演进，不是从简单工具变成复杂工具，
+而是从"单次实验自动化"逐步扩展到
+"搜索机制自优化"、"跨任务迁移"和"生产级持续运行"。
+```
+
+### 3.3 演进主线：从MOP到MASE的范式转移
+
+上述演进共同指向一个更大的范式转移——从**MOP（Model Offline Pretraining，模型离线预训练）**向**MASE（Multi-Agent Self-Evolving，多智能体自演化）**的时代性转变。
 
 | 维度 | MOP时代 | MASE时代 |
 |------|---------|----------|
@@ -117,46 +358,34 @@ Autoresearch的方法论发展并非一蹴而就，而是在短短数月内经�
 | 迁移能力 | 人工设计 | 跨域自动迁移 |
 | 部署形态 | 实验室验证 | 生产级持续运行 |
 
-格拉斯哥大学等8所顶尖高校联合发表的《Self-Evolving AI Agents》综述（涵盖200+项前沿研究）提出的**"自演化三定律"**为MASE范式提供了规范性框架：
+格拉斯哥大学等多所高校联合发表的《Self-Evolving AI Agents》综述（涵盖200+项前沿研究）提出的**"自演化三定律"**为MASE范式提供了规范性框架：
 
 1. **安全第一**：任何升级不破坏系统稳定
 2. **性能不减**：新技能必须⊆旧能力（避免灾难性遗忘）
 3. **自主进化**：无需人类写死规则
 
 ---
-## 3. 技术生态：关键变体与扩展方向
-
-### 3.1 变体图谱
-
-| 变体名称 | 核心创新 | 技术特征 | 状态 |
-|----------|----------|----------|------|
-| **AutoResearchClaw** | 多批次并行扩展 | 同时运行多个独立实例，分而治之策略 | v0.4.0（2026.04），新增HITL人机协作系统 |
-| **EvoScientist** | 持久记忆增强 | 整合外部知识库、文献数据库和长期经验存储 | 活跃开发 |
-| **AutoResearch-RL** | 持续自我评估强化学习 | 将内层循环的保留/丢弃决策建模为策略网络输出 | 概念验证 |
-| **HyperAgents** (Meta/UBC/Oxford/NYU) | 元级技能跨域迁移 | 元级技能（记忆管理、探索策略等）跨领域迁移，imp@50=0.630 | 2026.03论文发表 |
-| **SWE-RL** (Meta) | 自博弈强化学习 | 代理交替扮演bug注入者和修复者，SWE-bench Verified +10.4分 | 2025.12发表 |
-
----
-
 
 ## 4. 核心工作深度解析
 
-本节对Autoresearch领域7篇代表性工作进行深度技术解析。第2章已勾勒方法论演进的主线脉络，本章则聚焦于每篇论文的**技术框架、实现细节、核心实验与独特贡献**，形成"面-点互补"的阅读结构。
+本节作为"论文卡片库"，对Autoresearch领域7篇代表性工作进行深度技术解析。第3章已经给出方法论演进主线；本章不再承担主线叙事，而是提供可按需查阅的**技术框架、关键实验、系统机制和独特贡献**。
 
 > 已整理为独立笔记：[[Bilevel Autoresearch Meta-Autoresearching Itself]]、[[Self-Evolving AI Agents Survey]]、[[AutoResearchClaw]]、[[HyperAgents Meta-Level Self-Modifiable Agents]]、[[SWE-RL Self-Play Reinforcement Learning for Software Engineering]]、[[Ranking Engineer Agent REA]]、[[AlphaEvolve A Coding Agent for Algorithmic Discovery]]。
+>
+> **阅读说明**：本章中的"执行示例"主要用于解释机制如何运行；除非明确说明来自论文原始实验日志，否则应理解为机制解释用的模拟流程，不应当作论文原始逐步记录。
 
 ---
 **7方向全景速览**：
 
-| # | 工作 | 核心贡献 | 解决的关键问题 | 与相邻方向的关系 |
-|---|------|----------|----------------|-----------------|
-| 4.1 | Bilevel Autoresearch | 双层优化框架：L1执行+L2机制发现 | 单层循环搜索效率瓶颈 | 为HyperAgents提供"搜索机制"的理论基础 |
-| 4.2 | Self-Evolving AI Survey | 四组件统一框架+自演化三定律 | 缺乏系统性的理论指导 | 为所有方向提供统一的分析语言和护栏 |
-| 4.3 | AutoResearchClaw | 从idea到paper的全流程+HITL人机协作 | 缺乏完整研究流水线和人类介入机制 | 将Bilevel的理论扩展为可操作的工程系统 |
-| 4.4 | HyperAgents | 元技能跨域迁移 | 自我改进受限于单一领域 | 将Bilevel的"机制发现"升级为"通用元技能" |
-| 4.5 | SWE-RL | 自博弈强化学习训练 | 缺乏人类标注数据时的训练信号 | 为Autoresearch提供"对抗性样本生成"机制 |
-| 4.6 | REA | 工业级生产部署+Hibernate-and-Wake | 真实环境中长周期异步运行 | 将概念验证推向规模化生产 |
-| 4.7 | AlphaEvolve | 进化式算法发现 | 算法设计依赖人类直觉 | 将Autoresearch从"调参"扩展到"发现新算法" |
+| #   | 工作                                               | 核心贡献                       | 解决的关键问题          | 与相邻方向的关系                     |
+| --- | ------------------------------------------------ | -------------------------- | ---------------- | ---------------------------- |
+| 4.1 | Bilevel Autoresearch                             | 双层优化框架：L1执行+L2机制发现         | 单层循环搜索效率瓶颈       | 为HyperAgents提供"搜索机制"的理论基础    |
+| 4.2 | Self-Evolving AI Survey                          | 四组件统一框架+自演化三定律             | 缺乏系统性的理论指导       | 为所有方向提供统一的分析语言和护栏            |
+| 4.3 | AutoResearchClaw                                 | 从idea到paper的全流程+HITL人机协作   | 缺乏完整研究流水线和人类介入机制 | 将Bilevel的理论扩展为可操作的工程系统       |
+| 4.4 | HyperAgents                                      | 元技能跨域迁移                    | 自我改进受限于单一领域      | 将Bilevel的"机制发现"升级为"通用元技能"    |
+| 4.5 | SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习） | 自博弈强化学习训练                  | 缺乏人类标注数据时的训练信号   | 为Autoresearch提供"对抗性样本生成"机制   |
+| 4.6 | REA（Ranking Engineer Agent，排序工程师智能体）             | 工业级生产部署+Hibernate-and-Wake | 真实环境中长周期异步运行     | 将概念验证推向规模化生产                 |
+| 4.7 | AlphaEvolve                                      | 进化式算法发现                    | 算法设计依赖人类直觉       | 将Autoresearch从"调参"扩展到"发现新算法" |
 
 > **阅读建议**：本章采用"总览→深度→关系"的三层结构。建议先浏览上表建立整体认知，再按需深入各节，最后阅读末尾的"方向间关系总览"。
 
@@ -221,7 +450,7 @@ Autoresearch的方法论发展并非一蹴而就，而是在短短数月内经�
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**执行示例**——一次完整的双层优化循环：
+**机制解释用模拟执行示例**——一次双层优化循环：
 
 | 步骤 | 层级 | 动作 | 具体内容 |
 |------|------|------|----------|
@@ -245,7 +474,7 @@ Autoresearch的方法论发展并非一蹴而就，而是在短短数月内经�
 
 ### 4.2 Self-Evolving AI Agents Survey (格拉斯哥大学等8校联合, 2026)
 
-**论文定位**：自演化AI智能体领域的首篇大规模系统性综述，涵盖200+项前沿研究，构建了统一的分析框架。
+**论文定位**：自演化AI智能体领域较早的大规模系统性综述之一，涵盖200+项前沿研究，构建了统一的分析框架。
 
 **核心框架——四组件反馈循环**：
 
@@ -290,7 +519,7 @@ Autoresearch的方法论发展并非一蹴而就，而是在短短数月内经�
 │                              通信协议进化                    │      │
 │                               └─────────────────────────────┘      │
 │                                                                   │
-│   MASE 护栏（自演化三定律）                                        │
+│   MASE（Multi-Agent Self-Evolving，多智能体自演化）护栏            │
 │   ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐   │
 │   │ 安全第一    │  │ 性能不减     │  │ 自主进化            │   │
 │   │ Stability   │  │ Non-Degrade  │  │ Autonomous          │   │
@@ -303,7 +532,7 @@ EvoAgentX 单命令执行流水线：
 └──────────┘   └──────────┘   └──────────┘   └──────────┘
 ```
 
-**执行示例**——开发者使用EvoAgentX的一次完整自进化迭代：
+**机制解释用模拟执行示例**——开发者使用EvoAgentX的一次自进化迭代：
 
 | 阶段 | 命令/动作 | 具体内容 |
 |------|----------|----------|
@@ -332,7 +561,7 @@ EvoAgentX 单命令执行流水线：
 v0.1-0.2: 多批次并行 → v0.3: 跨平台支持 → v0.4.0: HITL人机协作系统
 ```
 
-**HITL 6种干预模式**（v0.4.0核心创新）：
+**HITL（Human-in-the-Loop，人机协作）6种干预模式**（v0.4.0核心创新）：
 
 | 模式 | 自主程度 | 适用场景 |
 |------|----------|----------|
@@ -379,7 +608,7 @@ v0.1-0.2: 多批次并行 → v0.3: 跨平台支持 → v0.4.0: HITL人机协作
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-**执行示例**——HITL co-pilot模式下的一次完整研究：
+**机制解释用模拟执行示例**——HITL（Human-in-the-Loop，人机协作）co-pilot模式下的一次研究：
 
 | 阶段 | 人类动作 | 代理动作 | HITL模式 |
 |------|----------|----------|----------|
@@ -446,7 +675,7 @@ ADAS (2024): 代理设计代理 → DGM (2025): 代理改进自身 → HyperAgen
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-**执行示例**——从机器人学到数学评分的跨域迁移：
+**机制解释用模拟执行示例**——从机器人学到数学评分的跨域迁移：
 
 | 阶段 | 动作 | 具体内容 |
 |------|------|----------|
@@ -511,7 +740,7 @@ ADAS (2024): 代理设计代理 → DGM (2025): 代理改进自身 → HyperAgen
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-**执行示例**——一次完整的自博弈训练回合：
+**机制解释用模拟执行示例**——一次自博弈训练回合：
 
 | 回合 | 角色 | 动作 | 代码示例 | 结果 |
 |------|------|------|----------|------|
@@ -529,7 +758,7 @@ ADAS (2024): 代理设计代理 → DGM (2025): 代理改进自身 → HyperAgen
 
 ### 4.6 Ranking Engineer Agent (REA): Autonomous AI Agent Accelerating Meta's Ads Ranking Innovation (Meta, 2026)
 
-**论文定位**：首个成功部署于真实工业级生产环境的自主ML实验代理，标志着Autoresearch从概念验证走向规模化生产的里程碑。
+**论文定位**：较早公开展示真实工业级生产部署的自主ML实验代理案例之一，标志着Autoresearch从概念验证走向规模化生产。
 
 **系统架构**：
 
@@ -598,7 +827,7 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-**执行示例**——Hibernate-and-Wake模式下跨天的广告排序实验：
+**机制解释用模拟执行示例**——Hibernate-and-Wake模式下跨天的广告排序实验：
 
 | 时间 | REA状态 | 动作 | 人类参与 |
 |------|---------|------|----------|
@@ -670,7 +899,7 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
 └───────────────────────────────────────────────────────────────────┘
 ```
 
-**执行示例**——矩阵乘法算法的一次完整进化迭代：
+**机制解释用模拟执行示例**——矩阵乘法算法的一次进化迭代：
 
 | 代次 | 代码生成器（Gemini-A） | 评估器（Gemini-B） | 选择器（Gemini-C） | 变异器（Gemini-D） |
 |------|----------------------|-------------------|-------------------|-------------------|
@@ -698,13 +927,13 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
         ▼
 方法论层：Bilevel Autoresearch（4.1）—— 机制级优化的数学基础
         │                           HyperAgents（4.4）—— 跨域迁移的通用能力
-        │                           SWE-RL（4.5）—— 对抗性训练的信号生成
+        │                           SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习，4.5）—— 对抗性训练的信号生成
         │                                    │
         └────────────────────────────────────┘
                         │
                         ▼
 工程实现层：AutoResearchClaw（4.3）—— 全流程可操作系统
-        │                           REA（4.6）—— 生产级部署方案
+        │                           REA（Ranking Engineer Agent，排序工程师智能体，4.6）—— 生产级部署方案
         │                           AlphaEvolve（4.7）—— 算法发现扩展
         │                                    │
                         └────────────────────┘
@@ -720,8 +949,8 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
 | 场景            | 推荐组合                          | 理由                  |
 | ------------- | ----------------------------- | ------------------- |
 | 学术研究（单任务深度优化） | Bilevel + AutoResearchClaw    | 双层框架提升搜索效率，HITL确保质量 |
-| 跨领域产品化部署      | HyperAgents + REA             | 元技能迁移+生产级休眠唤醒机制     |
-| 代码工程自动化       | SWE-RL + AutoResearchClaw     | 自博弈生成训练数据，全流程管理实验   |
+| 跨领域产品化部署      | HyperAgents + REA（Ranking Engineer Agent，排序工程师智能体） | 元技能迁移+生产级休眠唤醒机制     |
+| 代码工程自动化       | SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习） + AutoResearchClaw | 自博弈生成训练数据，全流程管理实验   |
 | 算法发现探索        | AlphaEvolve + Bilevel Level 2 | 进化算法+机制生成双重驱动       |
 
 ---
@@ -730,14 +959,16 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
 
 ### 5.1 工业界密集投入
 
-| 机构 | 项目/产品 | 关键数据 | 战略意义 |
-|------|-----------|----------|----------|
-| **Anthropic** | AAR (Automated Alignment Researcher) | 9个并行代理/5天/800研究小时，PGR从0.23提升至0.97；每AAR小时成本约$22 | "计算即科研"范式，Claude已"在设计上扮演下一版Claude的积极角色" |
-| **OpenAI** | 自动化研究实习生 | 目标：2026年9月部署自动化AI研究实习生；2028年3月实现完全自动化AI研究员 | 规划数十万自动化研究"实习生"，约2年内实现完全自动化研究劳动力 |
-| **Meta** | REA (Ranking Engineer Agent) | 3名工程师完成16人工作量，模型精度提升2倍，工程产出提升5倍 | 首个部署于真实工业级生产环境的自主ML实验代理 |
-| **Cognition AI** | Devin 2.0 | $73M ARR（2026年初）；67% PR合并率；Nubank报告8x效率提升、20x成本节省 | 动态重规划无需人工干预，已实现工具创造的自我改进 |
-| **Cursor** | 实时RL持续训练 | 每5小时发布更新模型，将用户会话转化为奖励信号 | 连续学习正在成为2026年首要议题 |
-| **Google DeepMind** | AlphaEvolve | Gemini训练时间缩短23%，持续回收Google全球0.7%计算资源 | Demis Hassabis："看到了自我改进的初步迹象" |
+| 机构 | 项目/产品 | 关键数据 | 战略意义 | 信息来源 | 来源可信度 |
+|------|-----------|----------|----------|----------|----------|
+| **Anthropic** | AAR (Automated Alignment Researcher) | 9个并行代理/5天/800研究小时，PGR从0.23提升至0.97；每AAR小时成本约$22 | "计算即科研"范式，Claude已"在设计上扮演下一版Claude的积极角色" | [Anthropic Research: Automated Alignment Researchers](https://www.anthropic.com/research/automated-alignment-researchers)、[Automated Weak-to-Strong Researcher](https://alignment.anthropic.com/2026/automated-w2s-researcher/) | 官方研究博客 |
+| **OpenAI** | 自动化研究实习生 | 媒体转述目标：2026年9月部署自动化AI研究实习生；2028年3月实现完全自动化AI研究员 | 如路线图成立，自动化研究劳动力将成为前沿实验室的重要战略方向 | [TechRadar转述Sam Altman公开路线图](https://www.techradar.com/ai-platforms-assistants/chatgpt/openai-roadmap-revealed-ai-research-interns-by-2026-full-blown-agi-researchers-by-2028)；需继续关注OpenAI官方确认 | 媒体转述，待官方确认 |
+| **Meta** | REA (Ranking Engineer Agent) | 3名工程师完成16人工作量，模型精度提升2倍，工程产出提升5倍 | 较早部署于真实工业级生产环境的自主ML实验代理案例 | [Engineering at Meta: Ranking Engineer Agent](https://engineering.fb.com/2026/03/17/developer-tools/ranking-engineer-agent-rea-autonomous-ai-system-accelerating-meta-ads-ranking-innovation/) | 官方工程博客 |
+| **Cognition AI** | Devin 2.0 | $73M ARR（2026年初）；67% PR合并率；Nubank报告8x效率提升、20x成本节省 | 动态重规划无需人工干预，已实现工具创造的自我改进 | [$73M ARR与67% PR合并率：AgentMarketCap行业分析](https://agentmarketcap.ai/blog/2026/04/13/cognition-devin-1m-73m-arr-autonomous-agent-revenue-growth-2026)；[Nubank效率与成本：Devin案例页快照](https://archive-devin-ai.lusion.co/) | 行业分析/案例页，需二次验证 |
+| **Cursor** | 实时RL持续训练 | 每5小时发布更新模型，将用户会话转化为奖励信号 | 连续学习正在成为2026年首要议题 | [Cursor Blog: Improving Composer through real-time RL](https://cursor.com/blog/real-time-rl-for-composer) | 官方产品技术博客 |
+| **Google DeepMind** | AlphaEvolve | Gemini关键训练kernel加速23%，带来1%训练时间下降；持续回收Google全球0.7%计算资源 | Demis Hassabis："看到了自我改进的初步迹象" | [Google DeepMind: AlphaEvolve](https://deepmind.google/discover/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/) | 官方研究博客 |
+
+> 注：Anthropic、Meta、Cursor、Google DeepMind条目优先引用官方来源；OpenAI和Cognition部分指标来自媒体或行业分析，应视为产业信号而非正式技术报告。
 
 ### 5.2 关键趋势：能力加速曲线
 
@@ -759,6 +990,17 @@ METR（Model Evaluation & Threat Research）的基准数据显示：
 - **反直觉策略冲突**：系统可能发现有效但反直觉的优化策略，与人类研究者的预期形成冲突
 - **可解释性差距**：随着系统能力提升，人类监督者可能越来越难以理解系统的内部状态和决策依据
 
+**风险-缓解矩阵**：
+
+| 风险 | 在Autoresearch中的具体表现 | 可用缓解机制 |
+|---|---|---|
+| 指标投机 | 代理发现评估器漏洞，优化分数而非真实能力 | 锁定评估器、保留holdout、交叉指标验证、人工抽查 |
+| 代码破坏 | 修改`train.py`时引入隐性错误或数据泄漏 | 沙箱执行、diff review、单元测试、Git rollback |
+| 引用幻觉 | 自动写作阶段生成不存在或不相关引用 | Citation verification、CrossRef/arXiv/Semantic Scholar校验、人工复核 |
+| 能力漂移 | 长期自改后行为偏离原始目标或安全边界 | checkpoint、版本审计、canary部署、HITL审批 |
+| 成本失控 | 代理持续扩展实验矩阵，消耗超出预算 | budget guardrails、阶段预算、自动暂停、审批阈值 |
+| 责任不清 | 多代理协作后难以追踪哪个决策导致问题 | artifact manifest、决策日志、run lineage、负责人签核 |
+
 ### 6.2 能力跃迁的不可预测性
 
 Bilevel Autoresearch实验已观察到方差达0.030的性能跃迁（某些运行产生-0.065的急剧改善，其他仅-0.011）。这种不可预测性源于**正反馈机制**——有效的机制改进不仅直接提升性能，还通过改变搜索策略间接开启新的改进机会。
@@ -775,12 +1017,12 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 
 ### 6.4 治理与标准的快速跟进
 
-| 时间 | 机构/事件 | 举措 |
-|------|-----------|------|
-| 2026.02 | NIST | 启动自主AI系统正式标准倡议，征集公众对代理安全风险、身份模型和部署考量的意见 |
-| 2026.03 | Galileo | 发布Agent Control（Apache 2.0开源），AWS、CrewAI、Glean作为发布合作伙伴 |
-| 2026.04 | ICLR 2026 | 首届"Recursive Self-Improvement"专门研讨会（4月26-27日，里约热内卢） |
-| 持续 | 国际AI安全报告2026 | 可靠安全测试变得更困难：模型正在学习区分测试环境与真实部署 |
+| 时间      | 机构/事件        | 举措                                                     |
+| ------- | ------------ | ------------------------------------------------------ |
+| 2026.02 | NIST         | 启动自主AI系统正式标准倡议，征集公众对代理安全风险、身份模型和部署考量的意见                |
+| 2026.03 | Galileo      | 发布Agent Control（Apache 2.0开源），AWS、CrewAI、Glean作为发布合作伙伴 |
+| 2026.04 | ICLR 2026    | 首届"Recursive Self-Improvement"专门研讨会（4月26-27日，里约热内卢）    |
+| 持续      | 国际AI安全报告2026 | 可靠安全测试变得更困难：模型正在学习区分测试环境与真实部署                          |
 
 ---
 
@@ -791,6 +1033,7 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 | 术语 | 定义 | 检索建议 |
 |------|------|----------|
 | **Autoresearch** | AI代理自主执行完整研究循环的范式 | 同时考虑auto-research、autonomous research变体 |
+| **Self-Evolving AI Agents** | 根据环境反馈持续优化自身组件的Agent系统 | 关注self-evolving agents、self-improving agents、MASE等相关表述 |
 | **Recursive Self-Improvement (RSI)** | 系统通过改进自身来增强自身能力的正反馈过程 | 关注"practical recursive self-improvement"限定表述 |
 | **Meta-Autoresearch** | 使用Autoresearch方法来优化Autoresearch系统本身 | 高特异性术语，直接关联arXiv:2603.23420 |
 | **Bilevel Autoresearch** | 内层优化任务输出、外层优化搜索策略的双层框架 | 与优化理论、控制理论交叉 |
@@ -798,9 +1041,9 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 ### 7.2 技术方法层
 
 - **自主实验循环**：Autonomous Experimentation Loop, closed-loop scientific discovery, self-driving laboratories
-- **元学习与AutoML**：meta-learning for AutoML, AutoML with LLM, neural architecture search with self-improvement
-- **进化算法与NAS**：evolutionary NAS, NAS with code evolution, weight-sharing NAS
-- **强化学习驱动**：RL for research optimization, self-play RL, continual RL with self-evaluation
+- **元学习与AutoML（Automated Machine Learning，自动化机器学习）**：meta-learning for AutoML, AutoML with LLM（Large Language Model，大语言模型）, neural architecture search with self-improvement
+- **进化算法与NAS（Neural Architecture Search，神经架构搜索）**：evolutionary NAS, NAS with code evolution, weight-sharing NAS
+- **强化学习驱动**：RL（Reinforcement Learning，强化学习） for research optimization, self-play RL, continual RL with self-evaluation
 
 ### 7.3 核心文献追踪
 
@@ -809,7 +1052,7 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 | 奠基性工作 | Karpathy/autoresearch (GitHub) | GitHub通知、X/Twitter动态 |
 | 方法论突破 | Qu & Lu, Bilevel Autoresearch (arXiv:2603.23420) | arXiv cs.AI订阅、Google Scholar引用提醒 |
 | 综述框架 | Self-Evolving AI Agents (8校联合) | 关注EvoAgentX开源框架进展 |
-| 工业动态 | Anthropic AAR, OpenAI自动化研究员计划 | 公司研究博客、 earnings call |
+| 工业动态 | Anthropic AAR（Automated Alignment Researcher，自动化对齐研究员）, OpenAI自动化研究员计划 | 公司研究博客、 earnings call |
 | 安全研究 | ICLR 2026 RSI Workshop | 研讨会论文集、AI Alignment Forum |
 
 ---
@@ -819,13 +1062,14 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 | 英文术语 | 中文翻译 | 首次出现 | 核心含义 |
 |----------|----------|----------|----------|
 | Autoresearch | 自主研究 | 1.1 | AI代理自主执行完整研究循环的范式 |
-| Recursive Self-Improvement (RSI) | 递归自我改进 | 3.1.2 | 系统通过改进自身来增强自身能力的正反馈过程 |
-| Meta-Autoresearch | 元自主研究 | 3.1.3 | 使用Autoresearch方法优化Autoresearch系统本身 |
+| Self-Evolving AI Agents | 自演化智能体 | 2.1 | 根据环境反馈持续优化自身组件的Agent系统 |
+| Recursive Self-Improvement (RSI) | 递归自我改进 | 2.6 | 系统通过改进自身来增强自身能力的正反馈过程 |
+| Meta-Autoresearch | 元自主研究 | 4.1 | 使用Autoresearch方法优化Autoresearch系统本身 |
 | Bilevel Optimization | 双层优化 | 4.1 | 上层优化搜索机制、下层优化任务性能的数学框架 |
-| Bilevel Autoresearch | 双层自主研究 | 3.1.4 | Qu & Lu提出的具体方法论框架 |
-| val_bpb | 验证集比特每字节 | 2.2 | 语言模型预训练任务的标准化评估指标 |
+| Bilevel Autoresearch | 双层自主研究 | 2.5 | Qu & Lu提出的具体方法论框架 |
+| val_bpb | 验证集比特每字节 | 2.1 | 语言模型预训练任务的标准化评估指标 |
 | ratchet | 棘轮 | 1.2 | 代码库只进不退的版本控制机制 |
-| MOP / MASE | 一次性训练部署 / 模型自动自我进化 | 2.5 | AI系统发展的两个时代性范式 |
+| MOP（Model Offline Pretraining，模型离线预训练） / MASE（Multi-Agent Self-Evolving，多智能体自演化） | 一次性训练部署 / 模型自动自我进化 | 2.4 / 3.3 | AI系统发展的两个时代性范式 |
 | HITL | Human-in-the-Loop | 4.3 | 人机协作模式，人类在关键节点介入 |
 | AAR | Automated Alignment Researcher | 5.1 | Anthropic的自动化对齐研究员 |
 | UCB | Upper Confidence Bound | 4.1 | 多臂老虎机算法中的置信上界策略 |
@@ -846,7 +1090,7 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 
 1. **计算资源替代人力资本**：AAR系统每小时约$22，远低于同等能力人类研究者。扩展AAR比扩展人类研究者"容易且便宜得多"。
 2. **民主化与集中化的张力**：Autoresearch同时蕴含知识生产民主化（降低门槛）和集中化（基础设施控制集中于少数科技巨头）的双重潜力。
-3. **安全框架滞后于能力**：每个主要AI实验室都在推进自我改进研究，但竞争动态创造了在安全保障就绪前推进能力的强烈激励。
+3. **安全框架滞后于能力**：多个主要AI实验室已公开推进自我改进相关研究，但竞争动态创造了在安全保障就绪前推进能力的强烈激励。
 
 ### 8.3 未来12个月的关键观察点
 
@@ -885,9 +1129,12 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 
 ### 产业动态来源
 
-- Anthropic AAR: Anthropic研究博客及CEO Dario Amodei公开声明
-- OpenAI自动化研究员计划: Sam Altman内部目标及a16z State of AI Infrastructure 2026
-- Cognition/Devin: TechCrunch, 客户案例（Nubank等）
+- Anthropic AAR: [Automated Alignment Researchers](https://www.anthropic.com/research/automated-alignment-researchers)、[Automated Weak-to-Strong Researcher](https://alignment.anthropic.com/2026/automated-w2s-researcher/)
+- OpenAI自动化研究员计划: [TechRadar转述Sam Altman公开路线图](https://www.techradar.com/ai-platforms-assistants/chatgpt/openai-roadmap-revealed-ai-research-interns-by-2026-full-blown-agi-researchers-by-2028)，需等待OpenAI官方材料进一步确认
+- Meta REA: [Engineering at Meta: Ranking Engineer Agent](https://engineering.fb.com/2026/03/17/developer-tools/ranking-engineer-agent-rea-autonomous-ai-system-accelerating-meta-ads-ranking-innovation/)
+- Cognition/Devin: [AgentMarketCap行业分析](https://agentmarketcap.ai/blog/2026/04/13/cognition-devin-1m-73m-arr-autonomous-agent-revenue-growth-2026)、[Devin/Nubank案例页快照](https://archive-devin-ai.lusion.co/)
+- Cursor实时RL: [Improving Composer through real-time RL](https://cursor.com/blog/real-time-rl-for-composer)
+- Google DeepMind AlphaEvolve: [AlphaEvolve: A Gemini-powered coding agent](https://deepmind.google/discover/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/)
 - METR能力基准: METR公开报告, centeraipolicy.org
 
 ### 检索建议

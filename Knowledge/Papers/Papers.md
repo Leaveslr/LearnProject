@@ -4,6 +4,7 @@
 
 ## Autoresearch 相关
 
+- [[Skill1 Unified Evolution of Skill-Augmented Agents via Reinforcement Learning.pdf]]
 - [[Bilevel Autoresearch Meta-Autoresearching Itself.pdf]]
 - [[Self-Evolving AI Agents Survey.pdf]]
 - [[AutoResearchClaw README.md]]
@@ -11,3 +12,7 @@
 - [[Self-Play Reinforcement Learning for Software Engineering.pdf]]
 - [[Ranking Engineer Agent REA Meta Engineering.html]]
 - [[AlphaEvolve A Coding Agent for Algorithmic Discovery.pdf]]
+
+## Diffusion 相关
+
+- [[MARBLE Multi-Aspect Reward Balance for Diffusion RL.pdf]]

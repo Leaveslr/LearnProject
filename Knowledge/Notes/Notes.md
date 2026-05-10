@@ -11,6 +11,8 @@
 
 ## 笔记列表
 
+- [[Skill1 Unified Evolution of Skill-Augmented Agents via Reinforcement Learning]]
+- [[MARBLE Multi-Aspect Reward Balance for Diffusion RL]]
 - [[Bilevel Autoresearch Meta-Autoresearching Itself]]
 - [[Self-Evolving AI Agents Survey]]
 - [[AutoResearchClaw]]

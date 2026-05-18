@@ -1,133 +1,134 @@
-# AI 大模型面试宝典
+# LLM Knowledge Book
 
-> 一本全面覆盖大模型算法岗面试的核心指南
+> 面向大模型算法岗和 AI Engineer 的渐进式学习笔记。
 
-**适用人群**：算法工程师 / 大模型算法岗 / AI Engineer
+这个仓库的目标不是简单堆资料，而是把 LLM 相关知识整理成一条可复习、可追问、可扩展的学习主线。建议先读 `src` 中的整理笔记，再按需要回到 `raw` 查看原始资料。
 
-**涵盖范围**：Transformer · Attention · 位置编码 · MoE · LoRA · RLHF · RAG · Agent · 推理优化 · 分布式训练
+## 怎么学习
 
----
+完整路线见：[学习路线与知识地图](./src/00-学习路线/01-学习路线与知识地图.md)。
 
-## 当前进度
+如果要把学习笔记继续转成小红书图文或视频脚本，见：[学习笔记到内容创作工作流](./src/00-学习路线/02-学习笔记到内容创作工作流.md)。
 
-✅ **已创建 17 个核心章节 + 13 个真实面试题文件**
+建议按下面 5 轮推进：
 
----
+1. **模型架构基础**：先理解 Transformer、Attention、位置编码、MoE。
+2. **训练与对齐**：再学习预训练、RLHF/DPO/GRPO、PEFT/LoRA。
+3. **推理与部署**：掌握 KV Cache、量化、部署框架和显存/延迟权衡。
+4. **应用系统**：学习 RAG、Agent、多模态和评估方法。
+5. **面试闭环**：用真实面试题检查知识点，整理项目表达和追问答案。
 
-### 🆕 新增内容 (2026-04-13)
+## 当前结构
 
-#### 主流模型架构 (新增)
-- [第三十九章：主流模型架构深度对比](./src/07-主流模型架构/01-主流模型架构深度对比.md) - DeepSeek V3/Llama 4/Qwen3/Gemma 3/MoE架构/MLA vs GQA
-- [第四十章：多模态大模型架构与面试](./src/07-主流模型架构/02-多模态大模型架构与面试.md) - GPT-4V/LLaVA/Qwen-VL/视觉编码器/模态对齐
+```text
+llm-knowledge-book/
+├── README.md          # 学习入口和目录
+├── src/               # 整理后的学习笔记
+├── templates/         # 学习笔记、图文笔记、视频脚本模板
+│   ├── 02-模型架构/
+│   ├── 03-训练技术/
+│   ├── 04-推理优化/
+│   ├── 05-应用技术/
+│   ├── 06-Agent/
+│   ├── 07-主流模型架构/
+│   ├── 08-面试技巧/
+│   └── 09-真实面试题/
+└── raw/               # 原始资料归档，不作为直接学习入口
+```
 
-#### AI Agent 进阶 (新增)
-- [第三十一章：Agent进阶：多模态Agent与生产实战](./src/06-Agent/02-Agent进阶：多模态Agent与生产实战.md) - Multi-Agent/RAG架构/LangChain/LangGraph
-- [第三十二章：多智能体协作与面试实战](./src/06-Agent/03-多智能体协作与面试实战.md) - Multi-Agent协作/ReAct/任务分解
+## 主线学习目录
 
----
+### 1. 模型架构
 
-## 目录
+- [Transformer 架构详解](./src/02-模型架构/01-Transformer详解.md)
+- [注意力机制深度剖析](./src/02-模型架构/02-注意力机制.md)
+- [位置编码](./src/02-模型架构/03-位置编码.md)
+- [多头注意力变体：MHA / MQA / GQA / MLA](./src/02-模型架构/04-多头注意力变体.md)
+- [混合专家模型 MoE](./src/02-模型架构/06-MoE详解.md)
+- [主流大模型架构深度对比](./src/07-主流模型架构/01-主流模型架构深度对比.md)
+- [多模态大模型架构与面试](./src/07-主流模型架构/02-多模态大模型架构与面试.md)
 
-### 第一部分：基础原理
-- [第一章：机器学习基础](./src/01-基础原理/01-机器学习基础.md)
-- [第二章：深度学习基础](./src/01-基础原理/02-深度学习基础.md)
+### 2. 训练与对齐
 
-### 第二部分：模型架构
-- [第三章：Transformer 架构详解](./src/02-模型架构/01-Transformer详解.md)
-- [第四章：注意力机制深度剖析](./src/02-模型架构/02-注意力机制.md)
-- [第五章：位置编码](./src/02-模型架构/03-位置编码.md)
-- [第六章：多头注意力与变体（MHA/MQA/GQA/MLA）](./src/02-模型架构/04-多头注意力变体.md)
-- [第七章：FFN 与激活函数](./src/02-模型架构/05-FFN与激活函数.md)
-- [第八章：混合专家模型 MoE](./src/02-模型架构/06-MoE详解.md)
+- [预训练](./src/03-训练技术/01-预训练.md)
+- [RLHF 与对齐技术](./src/03-训练技术/03-RLHF对齐.md)
+- [PEFT 高效微调](./src/03-训练技术/06-PEFT高效微调.md)
+- [LoRA 原理与实战](./src/03-训练技术/07-LoRA详解.md)
+- [强化学习对齐深度解析：RLHF / DPO / GRPO](./src/03-训练技术/08-强化学习对齐深度解析.md)
 
-### 第三部分：训练技术
-- [第九章：预训练与自监督学习](./src/03-训练技术/01-预训练.md)
-- [第十章：SFT 有监督微调](./src/03-训练技术/02-SFT微调.md)
-- [第十一章：RLHF 与对齐技术](./src/03-训练技术/03-RLHF对齐.md)
-- [第十二章：DPO 详解](./src/03-训练技术/04-DPO详解.md)
-- [第十三章：GRPO 与 GSPO](./src/03-训练技术/05-GRPO-GSPO.md)
-- [第十四章：PEFT 高效微调](./src/03-训练技术/06-PEFT高效微调.md)
-- [第十五章：LoRA 原理与实战](./src/03-训练技术/07-LoRA详解.md)
-- [第十六章：分布式训练](./src/03-训练技术/08-分布式训练.md)
+### 3. 推理优化与部署
 
-### 第四部分：推理优化
-- [第十七章：推理框架（vLLM/SGLang/LMDeploy）](./src/04-推理优化/01-推理框架.md)
-- [第十八章：KV Cache 优化](./src/04-推理优化/02-KV-Cache优化.md)
-- [第十九章：量化技术（AWQ/GPTQ/GGUF）](./src/04-推理优化/03-量化技术.md)
-- [第二十章：模型部署实战](./src/04-推理优化/04-模型部署.md)
+- [KV Cache 与推理优化](./src/04-推理优化/02-KV-Cache优化.md)
+- [数值精度、量化与部署基础](./src/04-推理优化/03-模型量化与部署/01-数值精度与量化基础.md)
 
-### 第五部分：应用技术
-- [第二十一章：RAG 系统架构](./src/05-应用技术/01-RAG系统架构.md)
-- [第二十二章：RAG 优化策略](./src/05-应用技术/02-RAG优化.md)
-- [第二十三章：Embedding 与向量数据库](./src/05-应用技术/03-Embedding向量库.md)
-- [第二十四章：Prompt Engineering](./src/05-应用技术/04-Prompt工程.md)
+### 4. RAG 与应用系统
 
-### 第六部分：AI Agent
-- [第二十五章：AI Agent 基础概念](./src/06-Agent/01-Agent基础.md)
-- [第二十六章：Agent 开发范式](./src/06-Agent/02-Agent开发范式.md)
-- [第二十七章：LangGraph 实战](./src/06-Agent/03-LangGraph实战.md)
-- [第二十八章：Agent 记忆系统](./src/06-Agent/04-Agent记忆系统.md)
-- [第二十九章：MCP 协议](./src/06-Agent/05-MCP协议.md)
-- [第三十章：Human-in-the-Loop](./src/06-Agent/06-Human-in-the-Loop.md)
+- [RAG 系统架构](./src/05-应用技术/01-RAG系统架构.md)
+- [RAG 与 Agent 系统深度解析](./src/05-应用技术/02-RAG与Agent系统深度解析.md)
 
-### 第七部分：主流模型
-- [第三十一章：GPT 系列演进](./src/07-主流模型/01-GPT系列.md)
-- [第三十二章：LLaMA 系列](./src/07-主流模型/02-LLaMA系列.md)
-- [第三十三章：DeepSeek 系列](./src/07-主流模型/03-DeepSeek系列.md)
-- [第三十四章：Qwen 系列](./src/07-主流模型/04-Qwen系列.md)
+### 5. Agent
 
-### 第八部分：面试技巧
-- [第三十五章：面试必问问题](./src/08-面试技巧/01-必问问题.md)
-- [第三十六章：自我介绍模板](./src/08-面试技巧/02-自我介绍.md)
-- [第三十七章：谈薪技巧](./src/08-面试技巧/03-谈薪技巧.md)
-- [第三十八章：HR 常问问题](./src/08-面试技巧/04-HR问题.md)
+- [Agent 基础](./src/06-Agent/01-Agent基础.md)
+- [Agent 进阶：多模态 Agent 与生产实战](./src/06-Agent/02-Agent进阶：多模态Agent与生产实战.md)
+- [多智能体协作与最新面试题](./src/06-Agent/03-多智能体协作与最新面试题.md)
 
----
+### 6. 面试技巧
+
+- [面试必问问题](./src/08-面试技巧/01-必问问题.md)
+- [面试必问问题原始整理](./src/08-面试技巧/02-面试必问问题原始.md)
+- [职业规划](./src/08-面试技巧/03-职业规划.md)
+
+## 真实面试题
+
+真实面试题不建议作为第一学习入口，更适合在完成主线章节后用于查漏补缺。
+
+- [Transformer 相关](./src/09-真实面试题/transformer相关.md)
+- [微调相关](./src/09-真实面试题/微调相关.md)
+- [强化学习相关](./src/09-真实面试题/强化学习相关.md)
+- [RAG 优化](./src/09-真实面试题/rag优化.md)
+- [Agent 相关](./src/09-真实面试题/agent相关.md)
+- [VLM 相关](./src/09-真实面试题/vlm相关.md)
+- [部署与推理加速](./src/09-真实面试题/部署-推理加速.md)
+- [机器学习](./src/09-真实面试题/机器学习.md)
+- [必会算法题目](./src/09-真实面试题/必会算法题目.md)
+- [综合面试题精选](./src/09-真实面试题/综合面试题精选.md)
+- [商汤面试题](./src/09-真实面试题/商汤面试题.md)
+- [美团面试题](./src/09-真实面试题/美团面试题.md)
+- [针对信息物理系统线性欺诈攻击的水印加密策略](./src/09-真实面试题/针对信息物理系统线性欺诈攻击的水印加密策略.md)
+
+## 后续补齐清单
+
+当前仓库已经有一条可学习主线，但还缺少一些应独立成章的内容：
+
+- **基础原理**：机器学习基础、深度学习基础、优化器、损失函数、归一化。
+- **训练技术**：SFT、DPO、GRPO/GSPO、数据工程、分布式训练。
+- **推理优化**：FlashAttention、PagedAttention、Speculative Decoding、Continuous Batching、Prefix Cache、推理压测。
+- **应用技术**：Embedding 模型、向量数据库、Prompt Engineering、RAG 评估体系。
+- **安全与评估**：越狱攻击、幻觉评估、模型评测、Agent 安全边界。
+- **项目表达**：项目复盘模板、STAR 表达、算法岗项目追问清单。
 
 ## 资料来源
 
-本书内容整理自以下优质开源资源：
+原始资料放在 [raw](./raw/README.md)。整理笔记应尽量从原始资料中提炼结构、补充判断，并避免直接把原始问答堆到主线章节里。
 
-1. **FAQ_Of_LLM_Interview** - 大模型算法岗面试题库 (1.8k stars)
-   - GitHub: https://github.com/aceliuchanghong/FAQ_Of_LLM_Interview
+主要来源包括：
 
-2. **LLMs Interview Questions** - DevInterview.io (63道面试题)
-   - GitHub: https://github.com/Devinterview-io/llms-interview-questions
+- FAQ_Of_LLM_Interview
+- LLMs Interview Questions
+- AI Engineering Interview Questions
+- LLM Interview Guide
+- LLM Agent Interview Guide
+- Awesome-LLM-Interview-Questions
+- AgentGuide
+- MLLM Survey
+- Awesome-Multimodal-RAG
+- Sebastian Raschka LLM architecture notes
 
-3. **AI Engineering Interview Questions** - AI工程面试题
-   - GitHub: https://github.com/amitshekhariitbhu/ai-engineering-interview-questions
+## 维护原则
 
-4. **LLM Interview Guide** - yuyouyu32 深度面试指南
-   - GitHub: https://github.com/yuyouyu32/llm-interview
-   - 涵盖：训练方法、部署优化、应用模式等深度内容
-
-5. **LLM Agent Interview Guide** - 量化与Agent面试指南
-   - GitHub: https://github.com/Lau-Jonathan/LLM-Agent-Interview-Guide
-   - 涵盖：模型量化、部署架构、Agent系统
-
-6. **Awesome-LLM-Interview-Questions** - 精选面试题集合
-   - GitHub: https://github.com/sreekanth-madisetty/Awesome-LLM-Interview-Questions
-
-7. **AgentGuide** - AI Agent 开发学习指南
-   - https://adongwanai.github.io/AgentGuide/
-   - 涵盖：LangChain/LangGraph 实战、高级 RAG、大模型面试
-
-8. **MLLM Survey** - 多模态大语言模型综述
-   - arxiv: 2306.13549
-   - 涵盖：视觉编码器、模态对齐、训练策略
-
-9. **Awesome-Multimodal-RAG** - 多模态 RAG 资源集合
-   - GitHub: https://github.com/JarvisUSTC/Awesome-Multimodal-RAG
-   - 涵盖：多模态检索增强生成最新进展
-
-10. **Sebastian Raschka LLM 架构对比** - 2025年主流模型深度分析
-    - https://magazine.sebastianraschka.com
-    - 涵盖：DeepSeek V3/Llama 4/Gemma 3 架构创新
-
-11. **Modern LLM Architecture Comparison** - 可视化架构对比
-    - https://profitmonk.github.io/visual-ai-tutorials/architecture-comparison.html
-    - 涵盖：MLA/GQA/滑动窗口注意力深度对比
-
----
-
-*最后更新：2026年4月*
+- README 只链接已经存在的笔记文件。
+- `src` 写成可学习的知识结构，`raw` 只做资料归档。
+- `templates` 用于把知识点转换成个人笔记、小红书图文、视频脚本。
+- 每个主线章节建议包含：核心概念、公式/流程、工程实现、常见坑、面试追问。
+- 面试题优先按知识点归类，不按公司堆叠。
+- 新增章节后同步更新本 README。

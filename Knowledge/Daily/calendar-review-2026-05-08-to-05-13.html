@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Calendar Review · 2026-05-08 to 2026-05-13</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #20242c;
+      --muted: #667085;
+      --line: #d8dee9;
+      --done: #13795b;
+      --todo: #b54708;
+      --delay: #6941c6;
+      --idea: #175cd3;
+      --risk: #b42318;
+      --soft-done: #e7f6ef;
+      --soft-todo: #fff3e5;
+      --soft-delay: #f1eafd;
+      --soft-idea: #e8f1ff;
+      --soft-risk: #feeceb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    header {
+      padding: 40px 28px 24px;
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .metric,
+    .review,
+    .day-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .metric {
+      padding: 16px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .day-card {
+      min-height: 390px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .day-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .date {
+      font-size: 22px;
+      font-weight: 750;
+      line-height: 1;
+    }
+
+    .weekday {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .badge.done {
+      background: var(--soft-done);
+      color: var(--done);
+    }
+
+    .badge.todo {
+      background: var(--soft-todo);
+      color: var(--todo);
+    }
+
+    .badge.delay {
+      background: var(--soft-delay);
+      color: var(--delay);
+    }
+
+    .section {
+      display: grid;
+      gap: 8px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    li {
+      margin: 5px 0;
+      color: #344054;
+      font-size: 14px;
+    }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+
+    .label.done {
+      background: var(--soft-done);
+      color: var(--done);
+    }
+
+    .label.todo {
+      background: var(--soft-todo);
+      color: var(--todo);
+    }
+
+    .label.delay {
+      background: var(--soft-delay);
+      color: var(--delay);
+    }
+
+    .label.idea {
+      background: var(--soft-idea);
+      color: var(--idea);
+    }
+
+    .label.risk {
+      background: var(--soft-risk);
+      color: var(--risk);
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 16px;
+    }
+
+    .review {
+      padding: 18px;
+    }
+
+    .review li {
+      font-size: 15px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .timeline-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .timeline-date {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      background: #f0f2f6;
+      padding: 2px 5px;
+      border-radius: 5px;
+      word-break: break-all;
+    }
+
+    @media (max-width: 1060px) {
+      .calendar,
+      .summary,
+      .review-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      header {
+        padding: 28px 20px 20px;
+      }
+
+      main {
+        width: min(100% - 28px, 1180px);
+        padding-top: 18px;
+      }
+
+      .calendar,
+      .summary,
+      .review-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .day-card {
+        min-height: auto;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Daily Calendar Review</h1>
+    <p>2026-05-08 至 2026-05-13 · 司机助手、Qwen3、论文分享与 skill 评估事项整理</p>
+  </header>
+
+  <main>
+    <section class="summary" aria-label="概览">
+      <div class="metric">
+        <strong>6</strong>
+        <p>已完成事项</p>
+      </div>
+      <div class="metric">
+        <strong>3</strong>
+        <p>当前未完成/待对齐</p>
+      </div>
+      <div class="metric">
+        <strong>2</strong>
+        <p>延期事项</p>
+      </div>
+      <div class="metric">
+        <strong>1</strong>
+        <p>明确复盘问题：时间预估偏乐观</p>
+      </div>
+    </section>
+
+    <section class="calendar" aria-label="日历">
+      <article class="day-card">
+        <div class="day-head">
+          <div>
+            <div class="date">05/08</div>
+            <div class="weekday">周五</div>
+          </div>
+          <span class="badge todo">复盘日</span>
+        </div>
+        <div class="section">
+          <h3>完成</h3>
+          <ul>
+            <li><span class="label done">完成</span>司机助手 PRD 细节基本确认。</li>
+            <li><span class="label done">完成</span>司机助手相关流程走通。</li>
+            <li><span class="label done">完成</span>Qwen3 压测代码完成。</li>
+          </ul>
+        </div>
+        <div class="section">
+          <h3>待处理</h3>
+          <ul>
+            <li><span class="label todo">待办</span>打断处理调研。</li>
+            <li><span class="label todo">待办</span>和国华对齐策略时间点。</li>
+            <li><span class="label todo">待办</span>Qwen3 3.6 部署卡点排查；压测代码路径：<code>/nfs/dataset-ofs-661-142656/llm_train/bench_intent.py</code></li>
+          </ul>
+        </div>
+        <div class="section">
+          <h3>复盘</h3>
+          <ul>
+            <li><span class="label risk">风险</span>工作时间预估偏乐观。</li>
+            <li><span class="label risk">风险</span>部署类任务受到不可预期问题影响。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="day-head">
+          <div>
+            <div class="date">05/09</div>
+            <div class="weekday">周六</div>
+          </div>
+          <span class="badge todo">承接日</span>
+        </div>
+        <div class="section">
+          <h3>计划</h3>
+          <ul>
+            <li><span class="label todo">待办</span>调研司机助手“打断如何处理”。</li>
+            <li><span class="label todo">待办</span>和国华对齐司机助手策略时间点。</li>
+            <li><span class="label todo">待办</span>继续完成 Qwen3 部署。</li>
+            <li><span class="label todo">待办</span>整理 FishFlow 论文分享。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="day-head">
+          <div>
+            <div class="date">05/11</div>
+            <div class="weekday">周一</div>
+          </div>
+          <span class="badge delay">延期</span>
+        </div>
+        <div class="section">
+          <h3>调整</h3>
+          <ul>
+            <li><span class="label delay">延期</span>AutoResearchClaw 写论文效果评估挪到 2026-05-13。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="day-head">
+          <div>
+            <div class="date">05/12</div>
+            <div class="weekday">周二</div>
+          </div>
+          <span class="badge done">推进日</span>
+        </div>
+        <div class="section">
+          <h3>完成</h3>
+          <ul>
+            <li><span class="label done">完成</span>Qwen3 部署卡点解决。</li>
+            <li><span class="label done">完成</span>司机助手打断处理调研。</li>
+            <li><span class="label done">完成</span>FishFlow 论文分享整理。</li>
+            <li><span class="label done">完成</span>skill 评估流程及人员 check。</li>
+          </ul>
+        </div>
+        <div class="section">
+          <h3>剩余</h3>
+          <ul>
+            <li><span class="label todo">核心</span>完成 Qwen3 压测，输出压测报告和司机助手资源诉求。</li>
+            <li><span class="label todo">待办</span>和国华对齐司机助手策略时间点，今天或明天完成。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="day-card">
+        <div class="day-head">
+          <div>
+            <div class="date">05/13</div>
+            <div class="weekday">周三</div>
+          </div>
+          <span class="badge todo">后续</span>
+        </div>
+        <div class="section">
+          <h3>计划</h3>
+          <ul>
+            <li><span class="label todo">待办</span>试用 AutoResearchClaw，评估其用于写论文的效果。</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <section class="review-grid" aria-label="复盘">
+      <article class="review">
+        <h2>复盘改进点</h2>
+        <ul>
+          <li><span class="label risk">估时</span>部署、压测、训练链路这类不确定性任务，不应按“理想路径”估时。建议拆成环境准备、首次跑通、错误排查、稳定复现、报告输出五段。</li>
+          <li><span class="label risk">缓冲</span>Qwen3 部署 3.6 卡点说明基础设施任务需要显式预留 buffer。建议默认加 30% 到 50% 排障时间。</li>
+          <li><span class="label todo">交付物</span>“完成压测”需要定义清楚输出：测试配置、GPU 型号、吞吐、延迟、显存、失败 case、资源诉求。否则容易只完成代码，不完成决策材料。</li>
+          <li><span class="label todo">依赖</span>涉及国华对齐的事项要提前约定时间点。建议把“等人对齐”从任务里拆出来，单独跟踪 owner 和截止时间。</li>
+          <li><span class="label todo">节奏</span>每天核心任务不宜超过三件。5 月 12 日这版已经收敛到 FishFlow、skill 评估、Qwen3 压测，结构更可执行。</li>
+          <li><span class="label idea">沉淀</span>司机助手打断处理、资源诉求、压测报告都适合沉淀成模板，后续评估其他模型或功能时复用。</li>
+        </ul>
+      </article>
+
+      <article class="review">
+        <h2>事项流转</h2>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">05/08</div>
+            <div>PRD、流程和压测代码有进展；部署与时间预估暴露风险。</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">05/09</div>
+            <div>承接遗留事项：打断处理、策略时间点、Qwen3 部署、FishFlow。</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">05/11</div>
+            <div>AutoResearchClaw 评估延期到 05/13。</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">05/12</div>
+            <div>FishFlow、skill 评估、Qwen3 部署卡点、打断调研完成；剩余 Qwen3 压测报告和资源诉求。</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">05/13</div>
+            <div>计划试用 AutoResearchClaw，评估写论文效果。</div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

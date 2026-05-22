@@ -12,6 +12,7 @@
 - [[Self-Play Reinforcement Learning for Software Engineering.pdf]]
 - [[Ranking Engineer Agent REA Meta Engineering.html]]
 - [[AlphaEvolve A Coding Agent for Algorithmic Discovery.pdf]]
+- [[ARIS Autonomous Research via Adversarial Multi-Agent Collaboration.pdf]]
 
 ## Diffusion 相关
 

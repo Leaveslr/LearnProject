@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LR AI 提效分享：用 Codex 管理日常事务</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #20242c;
+      --muted: #667085;
+      --line: #d8dee8;
+      --blue: #175cd3;
+      --blue-soft: #eaf2ff;
+      --green: #13795b;
+      --green-soft: #e7f6ef;
+      --orange: #b54708;
+      --orange-soft: #fff3e5;
+      --purple: #6941c6;
+      --purple-soft: #f2ecff;
+      --red: #b42318;
+      --red-soft: #feeceb;
+      --shadow: 0 14px 36px rgba(32, 36, 44, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero,
+    main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 44px 0 34px;
+      display: grid;
+      grid-template-columns: 1.35fr 0.85fr;
+      gap: 28px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 26px;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    main {
+      padding: 28px 0 52px;
+      display: grid;
+      gap: 22px;
+    }
+
+    section,
+    .hero-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    section {
+      padding: 24px;
+    }
+
+    .hero-card {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero-card .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 14px;
+      color: #344054;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+      background: var(--blue);
+    }
+
+    .dot.green {
+      background: var(--green);
+    }
+
+    .dot.orange {
+      background: var(--orange);
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .kpi strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .module {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 16px;
+      min-height: 250px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+      background: #fff;
+    }
+
+    .module.blue {
+      background: linear-gradient(180deg, var(--blue-soft), #fff 42%);
+    }
+
+    .module.green {
+      background: linear-gradient(180deg, var(--green-soft), #fff 42%);
+    }
+
+    .module.purple {
+      background: linear-gradient(180deg, var(--purple-soft), #fff 42%);
+    }
+
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .icon.green {
+      background: var(--green);
+    }
+
+    .icon.purple {
+      background: var(--purple);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #344054;
+      background: #f2f4f7;
+    }
+
+    .chip.done {
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .chip.todo {
+      color: var(--orange);
+      background: var(--orange-soft);
+    }
+
+    .chip.risk {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .step {
+      position: relative;
+      padding: 14px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      min-height: 94px;
+    }
+
+    .step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: -10px;
+      top: 42px;
+      width: 10px;
+      height: 2px;
+      background: var(--line);
+    }
+
+    .step b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .input-box,
+    .output-box {
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      padding: 16px;
+      background: #fff;
+    }
+
+    .input-box {
+      background: #f9fafb;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #344054;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 86px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .timeline-item:first-child {
+      border-top: 0;
+    }
+
+    .date {
+      font-weight: 800;
+      color: var(--blue);
+      font-size: 13px;
+    }
+
+    .list {
+      margin: 0;
+      padding-left: 18px;
+      color: #344054;
+    }
+
+    .list li {
+      margin: 6px 0;
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .review-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .task-flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .takeaway {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .takeaway .review-card {
+      min-height: 138px;
+    }
+
+    .usecase-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .usecase {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      min-height: 190px;
+      align-content: start;
+    }
+
+    .usecase .prompt {
+      border-radius: 8px;
+      padding: 10px;
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      color: #344054;
+      font-size: 13px;
+    }
+
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .scenario {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .scenario-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .scenario-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+    }
+
+    .scenario-no {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .scenario-lines {
+      display: grid;
+      gap: 8px;
+    }
+
+    .scenario-body {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .result-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .result-panel h3 {
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .result-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #344054;
+      font-size: 14px;
+    }
+
+    .result-list li {
+      margin: 5px 0;
+    }
+
+    .mock-chat {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfbfc;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .mock-time {
+      text-align: center;
+      color: #98a2b3;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .mock-message {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .mock-message.right {
+      justify-content: flex-end;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #e5e7eb;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .msg {
+      max-width: 74%;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #344054;
+      background: #f2f4f7;
+      border: 1px solid #eef0f3;
+    }
+
+    .mock-message.right .msg {
+      background: #e8f1ff;
+      border-color: #d6e5ff;
+    }
+
+    .quote {
+      margin-top: 8px;
+      padding-left: 10px;
+      border-left: 3px solid #f08b45;
+      color: #475467;
+    }
+
+    .read-state {
+      color: #98a2b3;
+      font-size: 12px;
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .line {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #344054;
+      background: #f9fafb;
+    }
+
+    .line.user {
+      background: var(--blue-soft);
+      border-color: #cfe0ff;
+    }
+
+    .line.codex {
+      background: var(--green-soft);
+      border-color: #cbead9;
+    }
+
+    .line.action {
+      background: var(--orange-soft);
+      border-color: #fed9aa;
+    }
+
+    .line strong {
+      display: inline-block;
+      min-width: 54px;
+      color: var(--ink);
+    }
+
+    .embedded-review {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .embedded-review summary {
+      cursor: pointer;
+      padding: 12px 14px;
+      font-weight: 800;
+      color: var(--ink);
+      background: #f9fafb;
+      border-bottom: 1px solid transparent;
+      list-style-position: inside;
+    }
+
+    .embedded-review[open] summary {
+      border-bottom-color: var(--line);
+    }
+
+    .review-frame {
+      display: block;
+      width: 100%;
+      height: min(72vh, 760px);
+      border: 0;
+      background: #fff;
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .split,
+      .review-grid,
+      .scenario-grid,
+      .scenario-body {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-3,
+      .kpis,
+      .takeaway,
+      .usecase-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .flow,
+      .task-flow {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .step:not(:last-child)::after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero,
+      main {
+        width: min(100% - 28px, 1180px);
+      }
+
+      .hero {
+        padding: 28px 0 20px;
+      }
+
+      section {
+        padding: 18px;
+      }
+
+      .grid-3,
+      .kpis,
+      .takeaway,
+      .usecase-grid,
+      .flow,
+      .task-flow {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-item {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <div>
+        <div class="eyebrow">AI 提效实践 · Codex 日常事务管理</div>
+        <h1>把 AI 从问答工具变成个人事务操作台</h1>
+        <p>核心不是让 AI 偶尔帮我写一段文字，而是让它持续维护任务状态：记录、提醒、执行动作、复盘沉淀。</p>
+      </div>
+      <div class="hero-card">
+        <div class="row"><span class="dot"></span>自然语言记录待办</div>
+        <div class="row"><span class="dot orange"></span>定期回收任务状态</div>
+        <div class="row"><span class="dot green"></span>输出复盘和改进建议</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>为什么需要它</h2>
+      <div class="kpis">
+        <div class="kpi"><strong>记</strong><p>把碎片任务写进 Daily</p></div>
+        <div class="kpi"><strong>追</strong><p>定时追问进展和卡点</p></div>
+        <div class="kpi"><strong>做</strong><p>执行提醒、文档、会议等动作</p></div>
+        <div class="kpi"><strong>复盘</strong><p>从过程记录生成建议</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>整体流程</h2>
+      <div class="flow">
+        <div class="step"><b>1. 输入</b><span>自然语言说今天要做什么</span></div>
+        <div class="step"><b>2. 记录</b><span>自动写入 Daily / 指定日期</span></div>
+        <div class="step"><b>3. 提醒</b><span>早上、每两小时、晚上复盘</span></div>
+        <div class="step"><b>4. 更新</b><span>完成、延期、阻塞、等待反馈</span></div>
+        <div class="step"><b>5. 收敛</b><span>已完成事项退出提醒</span></div>
+        <div class="step"><b>6. 复盘</b><span>生成日历、周报、改进点</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>三个核心模块</h2>
+      <div class="grid-3">
+        <article class="module blue">
+          <div class="icon">记</div>
+          <h3>待办管理</h3>
+          <p>把口头任务整理成结构化 Daily，支持当天、未来日期和周期性事项。</p>
+          <div class="chips">
+            <span class="chip">今日 ToDo</span>
+            <span class="chip">明天待办</span>
+            <span class="chip">周期提醒</span>
+          </div>
+        </article>
+
+        <article class="module green">
+          <div class="icon green">做</div>
+          <h3>动作执行</h3>
+          <p>不只记录，也可以继续执行：提醒人、生成文档、整理会议材料、输出网页。</p>
+          <div class="chips">
+            <span class="chip done">群提醒</span>
+            <span class="chip done">私信提醒</span>
+            <span class="chip done">文档生成</span>
+          </div>
+        </article>
+
+        <article class="module purple">
+          <div class="icon purple">盘</div>
+          <h3>复盘分析</h3>
+          <p>按时间线回看完成、延期、阻塞，定位估时问题和协作依赖。</p>
+          <div class="chips">
+            <span class="chip risk">延期识别</span>
+            <span class="chip risk">耗时分析</span>
+            <span class="chip risk">改进建议</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>适用场景介绍</h2>
+      <div class="scenario-grid">
+        <article class="scenario">
+          <div class="scenario-head">
+            <div class="scenario-title"><span class="scenario-no">1</span>每日待办管理</div>
+            <span class="chip">适合：临时事项 / 明天事项 / 周期事项</span>
+          </div>
+          <div class="scenario-body">
+            <div class="scenario-lines">
+              <div class="line user"><strong>我：</strong>今天 ToDo：整理司机助手介绍文档；梳理 LR AI 提效分享；梳理供需沟通位需求。</div>
+              <div class="line codex"><strong>Codex：</strong>已写入今天 Daily，并按“今日 ToDo / 待处理 / 已完成”整理。</div>
+              <div class="line user"><strong>我：</strong>明天做 AutoResearchClaw 评估，周五提醒我提交 skill 结果。</div>
+              <div class="line codex"><strong>Codex：</strong>已分别写入明天 Daily 和周期提醒，不混在今天任务里。</div>
+            </div>
+            <div class="result-panel">
+              <h3>产出</h3>
+              <ul class="result-list">
+                <li>把碎片输入变成结构化 Daily。</li>
+                <li>支持今天、明天、指定日期和周期性提醒。</li>
+                <li>保留历史未收口事项，避免遗漏。</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="scenario">
+          <div class="scenario-head">
+            <div class="scenario-title"><span class="scenario-no">2</span>定时追问和状态回收</div>
+            <span class="chip todo">适合：容易拖延 / 容易忘 / 需要持续推进</span>
+          </div>
+          <div class="scenario-body">
+            <div class="scenario-lines">
+              <div class="line user"><strong>我：</strong>每两个小时提醒我，晚上 8 点做复盘。</div>
+              <div class="line codex"><strong>10:00：</strong>今天计划推进哪几项？昨天遗留有国华对齐和 AutoResearchClaw。</div>
+              <div class="line codex"><strong>12:00：</strong>当前卡在哪一项？下一步动作是什么？</div>
+              <div class="line codex"><strong>16:00：</strong>FishFlow 和 skill 已完成，剩余 Qwen3 资源诉求和国华对齐。</div>
+              <div class="line codex"><strong>20:00：</strong>今天完成了什么？没完成的原因是什么？明天继续哪些？</div>
+            </div>
+            <div class="result-panel">
+              <h3>产出</h3>
+              <ul class="result-list">
+                <li>提醒内容随任务状态自动变化。</li>
+                <li>完成项退出提醒，减少噪音。</li>
+                <li>晚间自动形成复盘问题。</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="scenario">
+          <div class="scenario-head">
+            <div class="scenario-title"><span class="scenario-no">3</span>执行协作动作</div>
+            <span class="chip done">适合：定时群消息 / 定时私信 / 定时订会议室</span>
+          </div>
+          <div class="scenario-body">
+            <div class="scenario-lines">
+              <div class="line user"><strong>场景一：</strong>周五 17:00 定时发群消息，提醒大家提交 skill 评估结果。</div>
+              <div class="line action"><strong>Codex：</strong>创建定时任务，到点通过 smartwork-cli 发送群消息，并记录执行结果。</div>
+              <div class="mock-chat" aria-label="定时群消息示例">
+                <div class="mock-time">2026-05-15 17:00</div>
+                <div class="mock-message right">
+                  <div>
+                    <div class="msg">
+                      大家今天下班前同步一下 skill 评估结果，没提交的辛苦补一下。
+                      <div class="quote">此群消息由 smartwork-cli 定时发送</div>
+                    </div>
+                    <div class="read-state">已读</div>
+                  </div>
+                  <div class="avatar">我</div>
+                </div>
+                <div class="mock-message">
+                  <div class="avatar">群</div>
+                  <div class="msg">收到，稍后补齐。</div>
+                </div>
+              </div>
+
+              <div class="line user"><strong>场景二：</strong>在早上 10 点给 xx 发消息，提醒他确认司机助手策略时间点。</div>
+              <div class="line action"><strong>Codex：</strong>创建 10:00 私信任务，到点发送，并记录已读/回复状态。</div>
+              <div class="mock-chat" aria-label="定时给某人发消息示例">
+                <div class="mock-time">2026-05-18 10:00</div>
+                <div class="mock-message right">
+                  <div>
+                    <div class="msg">
+                      早上好，今天方便确认一下司机助手策略时间点吗？
+                      <div class="quote">此消息由 smartwork-cli 定时发送给 xx</div>
+                    </div>
+                    <div class="read-state">已读</div>
+                  </div>
+                  <div class="avatar">我</div>
+                </div>
+                <div class="mock-message">
+                  <div class="avatar">xx</div>
+                  <div class="msg">可以，下午 3 点对一下。</div>
+                </div>
+              </div>
+
+              <div class="line user"><strong>场景三：</strong>在早上 10 点给我定个晚上 10 点到 11 点的会议室。</div>
+              <div class="line action"><strong>Codex：</strong>创建 10:00 会议室预订任务，到点调用 smartwork-cli 的会议室 skill。</div>
+              <div class="mock-chat" aria-label="会议室预订示例">
+                <div class="mock-time">2026-05-18 10:00</div>
+                <div class="mock-message right">
+                  <div>
+                    <div class="msg">
+                      调用会议室 skill，预定晚上 10 点到 11 点的会议
+                      <div class="quote">发送给 smartwork-cli</div>
+                    </div>
+                  </div>
+                  <div class="avatar">我</div>
+                </div>
+                <div class="mock-message">
+                  <div class="avatar">S</div>
+                  <div class="msg">
+                    预订详情：<br>
+                    会议室：经纬（湾流大厦 G 层）<br>
+                    时间：2026 年 5 月 18 日 22:00-23:00<br>
+                    会议主题：今晚会议
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="result-panel">
+              <h3>产出</h3>
+              <ul class="result-list">
+                <li>定时群消息：到点发送并记录群内反馈。</li>
+                <li>定时私信：早上 10 点发送给 xx，并记录已读/回复。</li>
+                <li>定时订会议室：早上 10 点调用会议室 skill，预订 22:00-23:00。</li>
+                <li>预订详情：经纬（湾流大厦 G 层），主题：今晚会议。</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="scenario">
+          <div class="scenario-head">
+            <div class="scenario-title"><span class="scenario-no">4</span>事项状态维护</div>
+            <span class="chip done">适合：完成 / 延期 / 阻塞 / 等反馈</span>
+          </div>
+          <div class="scenario-body">
+            <div class="scenario-lines">
+              <div class="line user"><strong>我：</strong>FishFlow 论文分享 done；skill 评估流程及人员 check done。</div>
+              <div class="line codex"><strong>Codex：</strong>已移入完成记录，后续提醒移除这两项。</div>
+              <div class="line user"><strong>我：</strong>AutoResearchClaw 推后到明天或后天。</div>
+              <div class="line codex"><strong>Codex：</strong>从今天移出，写入 5 月 13 日待办。</div>
+              <div class="line user"><strong>我：</strong>Qwen3 部署 done，但压测没完成。</div>
+              <div class="line codex"><strong>Codex：</strong>拆成“部署完成”和“压测待完成”，并保留压测报告交付物。</div>
+            </div>
+            <div class="result-panel">
+              <h3>产出</h3>
+              <ul class="result-list">
+                <li>任务状态不靠人脑记忆。</li>
+                <li>延期事项自动迁移到未来日期。</li>
+                <li>粗任务会被拆成更清晰的交付物。</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="scenario">
+          <div class="scenario-head">
+            <div class="scenario-title"><span class="scenario-no">5</span>复盘和交付物生成</div>
+            <span class="chip risk">适合：周报 / 分享稿 / 日历复盘 / 项目总结</span>
+          </div>
+          <div class="scenario-body">
+            <div class="scenario-lines">
+              <div class="line user"><strong>我：</strong>把这几天的事情整理成日历网页，并复盘有哪些改进点。</div>
+              <div class="line codex"><strong>Codex：</strong>生成日历视图，标出完成、延期、阻塞和未收口事项。</div>
+              <div class="line user"><strong>我：</strong>再基于这些内容，整理成 AI 提效分享页面。</div>
+              <div class="line codex"><strong>Codex：</strong>生成可直接投屏的 HTML，提炼场景、用法和 Demo。</div>
+            </div>
+            <div class="result-panel">
+              <h3>产出</h3>
+              <ul class="result-list">
+                <li>日历复盘网页。</li>
+                <li>完成/延期/阻塞清单。</li>
+                <li>周报、分享稿、项目复盘材料。</li>
+              </ul>
+            </div>
+          </div>
+          <details class="embedded-review">
+            <summary>展开查看复盘日历网页</summary>
+            <iframe
+              class="review-frame"
+              src="../Daily/calendar-review-2026-05-08-to-05-13.html"
+              title="2026-05-08 至 2026-05-13 复盘日历">
+            </iframe>
+          </details>
+        </article>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>

@@ -8,7 +8,7 @@
 
 ## 摘要
 
-2026年3月，Andrej Karpathy开源的`autoresearch`项目（630行Python代码）引爆了AI研究自动化的浪潮。这一范式通过AI代理自主执行"提出假设-修改代码-运行实验-评估保留"的闭环循环，将研究速度从人类时间尺度（天/周）推向机器时间尺度（分钟/小时）。此后一个月内，学术界与工业界密集涌现突破性进展：从双层元递归框架（5倍性能提升）到Anthropic的AAR（Automated Alignment Researcher，自动化对齐研究员），从HyperAgents的跨领域机制迁移到Meta REA（Ranking Engineer Agent，排序工程师智能体）的生产级部署，从SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习）到AlphaEvolve的进化式算法发现，Autoresearch正从概念验证快速迈向工程实践与产业化部署。本报告系统梳理该范式的技术架构、关键变体、产业动态与安全挑战，为技术决策提供全景参考。
+2026年3月，Andrej Karpathy开源的`autoresearch`项目（630行Python代码）引爆了AI研究自动化的浪潮。这一范式通过AI代理自主执行"提出假设-修改代码-运行实验-评估保留"的闭环循环，将研究速度从人类时间尺度（天/周）推向机器时间尺度（分钟/小时）。此后一个月内，学术界与工业界密集涌现突破性进展：从双层元递归框架（5倍性能提升）到Anthropic的AAR（Automated Alignment Researcher，自动化对齐研究员），从HyperAgents的跨领域机制迁移到Meta REA（Ranking Engineer Agent，排序工程师智能体）的生产级部署，从SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习）到AlphaEvolve的进化式算法发现，再到ARIS对研究harness、记忆检索与证据保障机制的系统化，Autoresearch正从概念验证快速迈向工程实践与产业化部署。本报告系统梳理该范式的技术架构、关键变体、产业动态与安全挑战，为技术决策提供全景参考。
 
 ---
 
@@ -124,7 +124,7 @@ Self-Evolving Agents的研究对象远宽于模型权重更新。Survey将可演
 | Workflow | 任务分解、执行顺序、多阶段流水线 | 从单轮实验走向idea-to-paper全流程 |
 | Multi-Agent Topology | 角色分工、通信图、动态协作结构 | 从单代理扩展到研究团队式代理系统 |
 
-这解释了为什么后续Autoresearch很快从单文件实验扩展到Bilevel、HyperAgents、AutoResearchClaw和REA：一旦"可修改对象"从代码参数扩大到prompt、记忆、工具、工作流和多代理结构，系统的改进空间就从局部调参跃迁为机制级进化。
+这解释了为什么后续Autoresearch很快从单文件实验扩展到Bilevel、HyperAgents、AutoResearchClaw、REA和ARIS：一旦"可修改对象"从代码参数扩大到prompt、记忆、工具、工作流、多代理结构和证据保障机制，系统的改进空间就从局部调参跃迁为机制级进化。
 
 **Figure 4/5/6的Markdown抽象：可演化对象地图**
 
@@ -159,7 +159,7 @@ Survey提出的三条设计约束可以视为自演化系统的护栏：
 | **Excel（Performance Preservation，性能保持）** | 新版本性能不低于旧版本 | 只有指标改善才保留，失败实验自动回退 |
 | **Evolve（Autonomous Evolution，自主进化）** | 在前两者约束下自主优化内部组件 | 代理持续生成假设、修改代码、积累策略 |
 
-优先级是`Endure（Safety Adaptation，安全适应） > Excel（Performance Preservation，性能保持） > Evolve（Autonomous Evolution，自主进化）`。这点对产业部署尤其关键：自主进化不是无约束的"越自动越好"，而是在安全和性能不退化的前提下释放搜索能力。REA的预检清单、A/B测试、预算确认，AutoResearchClaw的HITL模式，本质上都是对这三条约束的工程化落地。
+优先级是`Endure（Safety Adaptation，安全适应） > Excel（Performance Preservation，性能保持） > Evolve（Autonomous Evolution，自主进化）`。这点对产业部署尤其关键：自主进化不是无约束的"越自动越好"，而是在安全和性能不退化的前提下释放搜索能力。REA的预检清单、A/B测试、预算确认，AutoResearchClaw的HITL模式，ARIS的claim audit和跨模型review，本质上都是对这三条约束的工程化落地。
 
 ### 2.4 从MOP到MASE：Autoresearch所处的历史位置
 
@@ -200,6 +200,7 @@ flowchart LR
 - HyperAgents：让元级技能跨领域迁移，突破单任务自我改进边界。
 - AutoResearchClaw：把工作流从单次实验扩展到idea-to-paper。
 - REA（Ranking Engineer Agent，排序工程师智能体）：把Endure（Safety Adaptation，安全适应）、Excel（Performance Preservation，性能保持）、Evolve（Autonomous Evolution，自主进化）工程化到真实生产系统。
+- ARIS：把长期自主科研的核心问题定义为research harness，包括持久记忆、可替换工作流、跨模型审稿和证据到claim的保障机制。
 - AlphaEvolve与SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习）：分别展示进化式搜索和自博弈奖励信号如何扩展Autoresearch的能力边界。
 
 因此，本章的作用是提供"之前的研究"这一底座：Self-Evolving Agents定义了问题空间，Autoresearch则是在这个问题空间中最具传播力和工程牵引力的具体范式。
@@ -333,6 +334,7 @@ Day 3:
 | 机制级自优化 | 让AI改进"如何搜索" | Bilevel Autoresearch | 从参数搜索升级到搜索机制生成 |
 | 统一理论框架 | 给自演化Agent提供共同语言和护栏 | Self-Evolving AI Agents Survey | 解释System Inputs、Agent System、Environment、Optimiser和三条约束 |
 | 全流程研究平台 | 从单次实验扩展到idea-to-paper | AutoResearchClaw | 把实验闭环扩成科研流水线 |
+| 研究harness与证据保障 | 从生成结果扩展到claim可审计 | ARIS | 把长期研究代理的记忆、检索、review和证据链系统化 |
 | 跨域元技能迁移 | 让改进经验跨任务复用 | HyperAgents | 从单任务优化走向通用元能力 |
 | 自博弈训练信号 | 在缺少人工标注时生成训练数据 | SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习） | 为代码类Autoresearch提供对抗性反馈 |
 | 生产级部署 | 在真实业务系统中长期运行 | REA（Ranking Engineer Agent，排序工程师智能体） | 解决异步实验、预算、安全、人类协作 |
@@ -368,14 +370,14 @@ Autoresearch的演进，不是从简单工具变成复杂工具，
 
 ## 4. 核心工作深度解析
 
-本节作为"论文卡片库"，对Autoresearch领域7篇代表性工作进行深度技术解析。第3章已经给出方法论演进主线；本章不再承担主线叙事，而是提供可按需查阅的**技术框架、关键实验、系统机制和独特贡献**。
+本节作为"论文卡片库"，对Autoresearch领域8篇代表性工作进行深度技术解析。第3章已经给出方法论演进主线；本章不再承担主线叙事，而是提供可按需查阅的**技术框架、关键实验、系统机制和独特贡献**。
 
-> 已整理为独立笔记：[[Bilevel Autoresearch Meta-Autoresearching Itself]]、[[Self-Evolving AI Agents Survey]]、[[AutoResearchClaw]]、[[HyperAgents Meta-Level Self-Modifiable Agents]]、[[SWE-RL Self-Play Reinforcement Learning for Software Engineering]]、[[Ranking Engineer Agent REA]]、[[AlphaEvolve A Coding Agent for Algorithmic Discovery]]。
+> 已整理为独立笔记：[[Bilevel Autoresearch Meta-Autoresearching Itself]]、[[Self-Evolving AI Agents Survey]]、[[AutoResearchClaw]]、[[HyperAgents Meta-Level Self-Modifiable Agents]]、[[SWE-RL Self-Play Reinforcement Learning for Software Engineering]]、[[Ranking Engineer Agent REA]]、[[AlphaEvolve A Coding Agent for Algorithmic Discovery]]、[[ARIS Autonomous Research via Adversarial Multi-Agent Collaboration]]。
 >
 > **阅读说明**：本章中的"执行示例"主要用于解释机制如何运行；除非明确说明来自论文原始实验日志，否则应理解为机制解释用的模拟流程，不应当作论文原始逐步记录。
 
 ---
-**7方向全景速览**：
+**8方向全景速览**：
 
 | #   | 工作                                               | 核心贡献                       | 解决的关键问题          | 与相邻方向的关系                     |
 | --- | ------------------------------------------------ | -------------------------- | ---------------- | ---------------------------- |
@@ -386,6 +388,7 @@ Autoresearch的演进，不是从简单工具变成复杂工具，
 | 4.5 | SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习） | 自博弈强化学习训练                  | 缺乏人类标注数据时的训练信号   | 为Autoresearch提供"对抗性样本生成"机制   |
 | 4.6 | REA（Ranking Engineer Agent，排序工程师智能体）             | 工业级生产部署+Hibernate-and-Wake | 真实环境中长周期异步运行     | 将概念验证推向规模化生产                 |
 | 4.7 | AlphaEvolve                                      | 进化式算法发现                    | 算法设计依赖人类直觉       | 将Autoresearch从"调参"扩展到"发现新算法" |
+| 4.8 | ARIS                                             | 研究harness+跨模型审稿+证据保障       | 长周期研究中的伪成功和claim失真 | 将idea-to-paper扩展为可审计研究工作流       |
 
 > **阅读建议**：本章采用"总览→深度→关系"的三层结构。建议先浏览上表建立整体认知，再按需深入各节，最后阅读末尾的"方向间关系总览"。
 
@@ -913,11 +916,62 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
 **产业意义**：DeepMind研究员Mostafa Dehghani指出"几乎所有主要实验室，新一代AI模型都在大量借助上一代模型来构建"，标志着递归自我改进已从理论推测进入工程现实。CEO Demis Hassabis在WEF 2026上确认"看到了自我改进的初步迹象"。
 
 ---
+
+### 4.8 ARIS: Autonomous Research via Adversarial Multi-Agent Collaboration (Shanghai Jiao Tong University, 2026)
+
+**论文定位**：开源自主科研research harness，把Autoresearch从“代理能否完成研究步骤”推进到“长期研究系统如何保存状态、独立审稿、审计证据并防止伪成功”。
+
+**核心问题**：长周期研究代理的典型风险不是显性失败，而是**plausible unsupported success（看似成功但证据不足）**：实验结果可能真实但被错误转述，论文claim可能超出证据许可范围，后续读者又会继承executor的叙事框架。
+
+**严格假设**：任何单代理长期任务都默认不可靠。因此，ARIS把研究过程拆成可替换子workflow，并推荐使用不同模型家族形成executor-reviewer对抗协作：executor负责推进产物，reviewer负责独立质疑、要求修改和审计证据链。
+
+**三层架构**：
+
+| 层级 | 核心组件 | 解决的问题 |
+|---|---|---|
+| 执行层 | 65+ Markdown定义的research skills、MCP模型/工具桥、research wiki、确定性图表生成 | 把研究能力拆成可复用、可审查、可替换的技能单元 |
+| 编排层 | Idea Discovery、Experiment Bridge、Auto Review Loop、Paper Writing、Rebuttal五个workflow | 让idea-to-paper和rebuttal成为可恢复、可路由、可调effort的流程 |
+| 保障层 | 实验完整性验证、result-to-claim映射、paper claim audit、五轮科学编辑、数学证明检查、PDF视觉检查 | 防止claim超出证据、引用/实验记录失真、论文叙事过度包装 |
+
+**系统框架图**：
+
+```
+┌──────────────────── ARIS 自主科研 Harness ─────────────────────┐
+│                                                                │
+│  Executor Model                         Reviewer Model         │
+│  Claude / Codex / Cursor / Trae   ←→    GPT / Gemini / GLM     │
+│        │                                      │                 │
+│        ▼                                      ▼                 │
+│  ┌───────────────── 执行层 ───────────────────────────────┐     │
+│  │  65+ Skills │ Research Wiki │ MCP Bridges │ FigureSpec │     │
+│  └──────────────────────────┬─────────────────────────────┘     │
+│                             ▼                                   │
+│  ┌───────────────── 编排层 ───────────────────────────────┐     │
+│  │  W1 Idea → W1.5 Experiment → W2 Review Loop            │     │
+│  │  → W3 Paper Writing → W4 Rebuttal                      │     │
+│  └──────────────────────────┬─────────────────────────────┘     │
+│                             ▼                                   │
+│  ┌───────────────── 保障层 ───────────────────────────────┐     │
+│  │  Integrity Check → Result-to-Claim → Claim Audit       │     │
+│  │  Scientific Editing → Proof Check → PDF Inspection     │     │
+│  └────────────────────────────────────────────────────────┘     │
+│                                                                │
+│  Meta-Optimization：记录研究trace，提出harness改进，经review后采用 │
+└────────────────────────────────────────────────────────────────┘
+```
+
+**早期部署经验**：技能库从21个core skills扩展到65+，覆盖机器人、硬件设计、通信、数学证明、基金写作和演示生成等方向。论文记录的一次约8小时overnight run完成4轮review-revise，将内部reviewer分数从5.0提升到7.5/10，启动20+个GPU实验，并删除缺乏证据支持的claim。作者强调这些只是观察性经验，不能因果证明ARIS本身带来提升。
+
+**与Autoresearch的关系**：ARIS把“研究harness”提升为核心对象。Karpathy autoresearch强调可验证实验闭环，Bilevel强调搜索机制也可被优化，AutoResearchClaw强调从idea到paper的流水线，ARIS则强调长期研究中的**状态、证据、claim和独立审稿**必须成为一等公民。
+
+🔗 **论文链接**：https://arxiv.org/abs/2605.03042  
+🔗 **项目链接**：https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep
+
 ---
 
-### 4.8 方向间关系总览：从"互补"到"融合"
+### 4.9 方向间关系总览：从"互补"到"融合"
 
-以上7个工作并非孤立存在，而是构成了Autoresearch生态中**层层递进、相互补充**的技术图谱。理解它们之间的关系，有助于判断特定场景下应该采用哪种技术组合。
+以上8个工作并非孤立存在，而是构成了Autoresearch生态中**层层递进、相互补充**的技术图谱。理解它们之间的关系，有助于判断特定场景下应该采用哪种技术组合。
 
 **层次关系图**：
 
@@ -935,6 +989,7 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
 工程实现层：AutoResearchClaw（4.3）—— 全流程可操作系统
         │                           REA（Ranking Engineer Agent，排序工程师智能体，4.6）—— 生产级部署方案
         │                           AlphaEvolve（4.7）—— 算法发现扩展
+        │                           ARIS（4.8）—— 研究harness与证据保障
         │                                    │
                         └────────────────────┘
                                     │
@@ -942,7 +997,7 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
                         应用场景：科研自动化 / 工业优化 / 算法发现
 ```
 
-**融合趋势**：当前最前沿的方向正在走向**交叉融合**——例如将Bilevel的Level 2机制生成能力、HyperAgents的跨域迁移能力、SWE-RL的自博弈信号生成能力组合在一起，形成更强大的自主研究系统。REA和AlphaEvolve则分别从"工程可靠性"和"发现能力"两个维度扩展了应用边界。
+**融合趋势**：当前最前沿的方向正在走向**交叉融合**——例如将Bilevel的Level 2机制生成能力、HyperAgents的跨域迁移能力、SWE-RL的自博弈信号生成能力组合在一起，形成更强大的自主研究系统。REA、AlphaEvolve和ARIS则分别从"工程可靠性"、"发现能力"和"证据保障能力"三个维度扩展了应用边界。
 
 **选型建议**：
 
@@ -952,6 +1007,7 @@ REA Planner（规划器） + REA Executor（执行器） + 共享系统（Skill/
 | 跨领域产品化部署      | HyperAgents + REA（Ranking Engineer Agent，排序工程师智能体） | 元技能迁移+生产级休眠唤醒机制     |
 | 代码工程自动化       | SWE-RL（Self-Play Reinforcement Learning，自博弈强化学习） + AutoResearchClaw | 自博弈生成训练数据，全流程管理实验   |
 | 算法发现探索        | AlphaEvolve + Bilevel Level 2 | 进化算法+机制生成双重驱动       |
+| 长周期论文生产与审计    | AutoResearchClaw + ARIS       | idea-to-paper流水线+证据到claim审计 |
 
 ---
 
@@ -1126,6 +1182,7 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 6. SWE-RL (2025). Meta Superintelligence Labs. 自博弈强化学习训练.
 7. REA - Ranking Engineer Agent (2026). Meta. *The Autonomous AI Agent Accelerating Meta's Ads Ranking Innovation*. 生产级自主ML实验代理.
 8. AlphaEvolve (2025). Google DeepMind. *A Coding Agent for Algorithmic Discovery*. Gemini驱动的进化式算法发现.
+9. Yang, R., Li, Y. & Li, S. (2026). *ARIS: Autonomous Research via Adversarial Multi-Agent Collaboration*. arXiv:2605.03042. https://arxiv.org/abs/2605.03042
 
 ### 产业动态来源
 
@@ -1135,12 +1192,13 @@ Nathan Lambert等人提出的反驳观点认为，递归自我改进将遭遇**�
 - Cognition/Devin: [AgentMarketCap行业分析](https://agentmarketcap.ai/blog/2026/04/13/cognition-devin-1m-73m-arr-autonomous-agent-revenue-growth-2026)、[Devin/Nubank案例页快照](https://archive-devin-ai.lusion.co/)
 - Cursor实时RL: [Improving Composer through real-time RL](https://cursor.com/blog/real-time-rl-for-composer)
 - Google DeepMind AlphaEvolve: [AlphaEvolve: A Gemini-powered coding agent](https://deepmind.google/discover/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/)
+- ARIS: [arXiv:2605.03042](https://arxiv.org/abs/2605.03042)、[项目仓库](https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep)
 - METR能力基准: METR公开报告, centeraipolicy.org
 
 ### 检索建议
 
 - **arXiv**: cs.AI / cs.LG / cs.CL / cs.SE板块，关键词"autoresearch OR bilevel autoresearch OR recursive self-improvement"
-- **GitHub**: 追踪karpathy/autoresearch, AutoResearchClaw, EvoScientist, EvoAgentX
+- **GitHub**: 追踪karpathy/autoresearch, AutoResearchClaw, ARIS/Auto-claude-code-research-in-sleep, EvoScientist, EvoAgentX
 - **会议**: NeurIPS/ICML/ICLR/AAAI的AutoML Workshop、AI for Science sessions、Agentic AI专题
 - **安全社区**: AI Alignment Forum, International AI Safety Report 2026, NIST标准倡议
 

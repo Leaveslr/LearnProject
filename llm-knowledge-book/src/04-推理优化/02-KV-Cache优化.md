@@ -47,7 +47,25 @@ for new_token in generated_tokens:
     output = attention(q, k_cache, v_cache)  # 只计算新 token 的 K, V
 ```
 
-### 11.2.2 KV Cache 的问题
+### 11.2.2 Prefill 与 Decode
+
+LLM 推理通常分成两个阶段：
+
+| 阶段 | 输入 | 主要瓶颈 | 是否能并行 |
+| --- | --- | --- | --- |
+| Prefill | 用户给出的完整 prompt | Attention/矩阵计算 | 是，整段 prompt 可并行 |
+| Decode | 每次新生成 1 个 token | KV Cache 读取和显存带宽 | 否，自回归逐 token |
+
+直觉：
+
+```text
+Prefill: 先把 prompt 全部读完，建立第一批 KV Cache
+Decode: 每生成一个新 token，只追加这个 token 的 K/V 到 cache
+```
+
+所以，首 token 延迟主要受 prefill 影响；长文本持续生成的吞吐和延迟则强依赖 decode 阶段的 KV Cache 管理。
+
+### 11.2.3 KV Cache 的问题
 
 | 问题 | 说明 |
 |------|------|
@@ -55,7 +73,29 @@ for new_token in generated_tokens:
 | **内存碎片** | 不连续分配导致浪费 |
 | **管理复杂** | 需要跟踪每个请求的缓存 |
 
-### 11.2.3 PagedAttention
+KV Cache 近似大小：
+
+```text
+每层 KV Cache ≈ 2 * seq_len * num_kv_heads * head_dim * dtype_bytes
+全模型 KV Cache ≈ 上式 * num_layers * batch_size
+```
+
+这里的 `2` 分别对应 K 和 V。
+
+### 11.2.4 MHA / MQA / GQA / MLA 对 KV Cache 的影响
+
+KV Cache 的大小和 `num_kv_heads` 强相关：
+
+| 注意力类型 | KV 头数量 | KV Cache | 取舍 |
+| --- | --- | --- | --- |
+| MHA | 等于 Q 头数量 | 最大 | 表达能力强，推理显存压力大 |
+| MQA | 1 组 KV 头 | 最小 | 省显存，但可能影响质量 |
+| GQA | 多个 Q 头共享一组 KV | 中等 | 质量和显存折中，现代 LLM 常见 |
+| MLA | 缓存低维 latent KV | 更小 | 实现更复杂，DeepSeek 系列代表 |
+
+这也是为什么长上下文推理里，GQA/MLA 往往和 KV Cache 优化一起讨论。
+
+### 11.2.5 PagedAttention
 
 vLLM 提出的方案，模仿操作系统的虚拟内存分页：
 

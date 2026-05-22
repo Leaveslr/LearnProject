@@ -1,0 +1,4 @@
+interface:
+  display_name: "Xiaohongshu Tech Note"
+  short_description: "Turn technical notes into Xiaohongshu posts"
+  default_prompt: "把这个技术知识点改写成小红书图文笔记"

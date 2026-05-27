@@ -17,6 +17,7 @@
 - `validation-cases/`：用具体知识点验证方法论是否可用。
 - `outputs/`：最终手册、简版清单和可直接复用的成品。
 - `outputs/conversation-usage-guide.md`：在对话框中加载和使用本方法论的提示词模板。
+- `outputs/knowledge-explanation-quality-rubric.md`：评估一个知识点是否达到“能学、能讲、能面试、能发布”的质量标准。
 
 ## 资料筛选标准
 
@@ -37,3 +38,4 @@
 - [x] 完成专家评估，并补充诊断、降阶、反例优化建议。
 - [x] 用滑动窗口完整跑通一次讲解流程。
 - [x] 补充对话框使用指南，方便后续直接加载方法论生成讲解。
+- [x] 补充知识讲解质量 Rubric，并用 KV Cache 跑通工程知识讲解样例。

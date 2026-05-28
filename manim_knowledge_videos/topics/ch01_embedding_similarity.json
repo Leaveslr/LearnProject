@@ -1,0 +1,56 @@
+{
+  "slug": "ch01_embedding_similarity",
+  "title": "Embedding 与向量相似度",
+  "segments": [
+    {
+      "duration": 6.5,
+      "subtitle": "神经网络不能直接处理文字。Embedding 的作用，就是把离散 token 变成可以计算的向量。",
+      "visual": {"type": "title", "headline": "文字怎么进入模型？", "subhead": "token -> id -> embedding vector"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "只给 token 编号是不够的。猫等于 12、狗等于 983，数字大小本身没有语义。",
+      "visual": {"type": "compare", "items": [{"title": "token id", "body": "只是编号"}, {"title": "问题", "body": "编号大小不代表语义"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "Embedding 表本质是一个大矩阵。输入 token id 后，模型从矩阵里取出对应那一行。",
+      "visual": {"type": "pipeline", "steps": ["token id", "查表", "第 i 行", "向量"], "caption": "Embedding = 可训练的查表"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "训练得好时，语义相近的 token 会在向量空间里更接近，比如猫和狗通常比猫和飞机更接近。",
+      "visual": {"type": "tokens", "tokens": ["猫", "狗", "飞机", "苹果"], "focus": 0, "note": "相似上下文会让向量结构逐渐形成"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "要区分 token embedding 和上下文表示。前者是初始向量，后者是经过 Transformer 后的动态表示。",
+      "visual": {"type": "compare", "items": [{"title": "Token Embedding", "body": "静态初始向量"}, {"title": "Contextual", "body": "融合上下文后的表示"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "同一个“苹果”，在“吃苹果”和“苹果公司股票”里，初始 embedding 可以相同，但上下文表示会不同。",
+      "visual": {"type": "trace", "items": [{"label": "吃苹果", "text": "更接近水果语义"}, {"label": "苹果股票", "text": "更接近公司语义"}, {"label": "原因", "text": "上下文改变了表示"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "向量相似度常用点积或余弦相似度。余弦相似度关心两个向量方向是否接近。",
+      "visual": {"type": "formula", "formula": "cos(a,b) = a·b / (|a||b|)", "items": [{"title": "方向近", "body": "语义可能接近"}, {"title": "方向远", "body": "语义可能不同"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "RAG 里，Embedding 负责先找资料。如果 query 和文档没有被映射到相近位置，后面生成再强也拿不到证据。",
+      "visual": {"type": "pipeline", "steps": ["query", "query vector", "chunk vector", "top-k 召回"], "caption": "RAG 第一步是向量检索"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "也要注意：RAG 用的检索 embedding，和生成模型内部的 token embedding，不一定是同一个模型或同一套向量空间。",
+      "visual": {"type": "compare", "items": [{"title": "Token Embedding", "body": "生成模型内部输入"}, {"title": "RAG Embedding", "body": "专门做检索匹配"}, {"title": "关键", "body": "别混成一件事"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "记住三句话：Embedding 是可训练查表；上下文表示会动态变化；向量相似不等于答案一定正确。",
+      "visual": {"type": "summary", "points": ["Embedding 把 token 变向量", "上下文会改变表示", "相似不等于事实正确"]}
+    }
+  ]
+}

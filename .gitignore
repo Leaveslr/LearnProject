@@ -1,1 +1,11 @@
 .DS_Store
+__pycache__/
+*.pyc
+
+# Generated video artifacts
+*.mp4
+*.wav
+*.aiff
+**/media/
+**/partial_movie_files/
+manim_knowledge_videos/outputs/**/frames*/

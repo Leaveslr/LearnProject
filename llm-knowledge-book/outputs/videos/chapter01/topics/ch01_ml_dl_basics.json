@@ -1,0 +1,56 @@
+{
+  "slug": "ch01_ml_dl_basics",
+  "title": "机器学习与深度学习基础",
+  "segments": [
+    {
+      "duration": 6.5,
+      "subtitle": "学大模型之前，先别急着背 Transformer。LLM 的底层仍然是概率建模、表示学习和梯度优化。",
+      "visual": {"type": "title", "headline": "大模型底层是什么？", "subhead": "概率建模 + 表示学习 + 梯度优化"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "语言模型最核心的问题是：给定前文，下一个 token 最可能是什么？",
+      "visual": {"type": "tokens", "tokens": ["我", "今天", "很", "？"], "focus": 3, "note": "前文决定下一个 token 的概率分布"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "概率建模把一句话拆成一连串条件概率：每一步都根据历史预测当前 token。",
+      "visual": {"type": "pipeline", "steps": ["前文", "条件概率", "下一个 token", "继续生成"], "caption": "自回归生成 = 一步一步接下去"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "训练目标通常是最大似然：让真实出现过的 token 序列，在模型眼里概率更高。",
+      "visual": {"type": "compare", "items": [{"title": "真实 token 高概率", "body": "模型被鼓励"}, {"title": "真实 token 低概率", "body": "模型被惩罚"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "实现时，我们常把最大似然变成最小化交叉熵，也就是惩罚模型不相信正确答案。",
+      "visual": {"type": "formula", "formula": "Loss = -log P(正确 token)", "items": [{"title": "P 高", "body": "loss 小"}, {"title": "P 低", "body": "loss 大"}, {"title": "目标", "body": "让正确 token 更可信"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "Embedding 负责把离散 token 变成连续向量。只有变成向量，模型才能做矩阵计算。",
+      "visual": {"type": "pipeline", "steps": ["token id", "Embedding 表", "向量", "Transformer"], "caption": "文字先进向量空间"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "优化器负责根据梯度改参数。梯度告诉方向，学习率决定每一步迈多大。",
+      "visual": {"type": "trace", "items": [{"label": "Loss", "text": "当前预测错得多不多"}, {"label": "Gradient", "text": "参数该往哪个方向改"}, {"label": "Optimizer", "text": "决定怎么走、走多大"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "归一化、残差和激活函数不是装饰，它们让深层网络更稳定、更容易训练、更有表达能力。",
+      "visual": {"type": "compare", "items": [{"title": "Norm", "body": "稳定尺度"}, {"title": "Residual", "body": "保留信息通路"}, {"title": "Activation", "body": "提供非线性"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "还要区分训练和推理：训练时答案已经在数据里，模型学会给它高概率；推理时只能一步步生成。",
+      "visual": {"type": "compare", "items": [{"title": "训练", "body": "看真实答案算 loss"}, {"title": "推理", "body": "按概率逐 token 生成"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "常见误区是：以为大模型和传统机器学习无关。实际上，LLM 只是把这些基础能力放大到了极致。",
+      "visual": {"type": "summary", "points": ["概率建模：预测下一个 token", "表示学习：把文字变向量", "梯度优化：用 loss 更新参数"]}
+    }
+  ]
+}

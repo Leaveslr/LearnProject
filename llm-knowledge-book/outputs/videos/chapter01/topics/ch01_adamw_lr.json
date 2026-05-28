@@ -1,0 +1,56 @@
+{
+  "slug": "ch01_adamw_lr",
+  "title": "AdamW 与学习率调度",
+  "segments": [
+    {
+      "duration": 6.5,
+      "subtitle": "训练模型不是只算 loss，还要决定参数怎么改。优化器就是参数更新的驾驶员。",
+      "visual": {"type": "title", "headline": "参数怎么一步步变好？", "subhead": "梯度给方向，优化器决定怎么走"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "每个 batch 都会经历：前向计算得到 loss，反向传播得到梯度，最后优化器更新参数。",
+      "visual": {"type": "pipeline", "steps": ["前向", "loss", "反向传播", "梯度", "更新参数"], "caption": "训练循环的核心链路"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "SGD 的直觉最简单：新参数等于旧参数减去学习率乘以梯度。",
+      "visual": {"type": "formula", "formula": "theta = theta - lr x grad", "items": [{"title": "grad", "body": "方向"}, {"title": "lr", "body": "步长"}, {"title": "theta", "body": "要更新的参数"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "学习率太大，可能越过最优点；太小，又会走得很慢。",
+      "visual": {"type": "compare", "items": [{"title": "lr 太大", "body": "震荡或发散"}, {"title": "lr 太小", "body": "收敛很慢"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "Adam 比 SGD 多看历史：一阶动量看最近方向，二阶动量看梯度尺度。",
+      "visual": {"type": "trace", "items": [{"label": "一阶动量", "text": "梯度方向的滑动平均"}, {"label": "二阶动量", "text": "梯度平方的滑动平均"}, {"label": "效果", "text": "不同参数自适应步长"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "AdamW 的关键是解耦 weight decay，让“沿梯度更新”和“控制参数规模”分开处理。",
+      "visual": {"type": "compare", "items": [{"title": "Adam", "body": "自适应更新"}, {"title": "Weight Decay", "body": "别让参数太夸张"}, {"title": "AdamW", "body": "两件事解耦"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "学习率调度决定每一步迈多大。训练初期常用 warmup，小步启动，降低发散风险。",
+      "visual": {"type": "pipeline", "steps": ["小步 warmup", "正常训练", "逐渐 decay", "稳定收敛"], "caption": "不同阶段用不同步长"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "大模型训练还常配合梯度裁剪、梯度累积、batch size 调整，来控制稳定性和显存压力。",
+      "visual": {"type": "compare", "items": [{"title": "Clipping", "body": "防梯度爆炸"}, {"title": "Accumulation", "body": "模拟大 batch"}, {"title": "Batch Size", "body": "影响稳定和吞吐"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "微调翻车时，不要只怪学习率。数据质量、训练轮数、loss mask 和 LoRA rank，也会一起影响结果。",
+      "visual": {"type": "trace", "items": [{"label": "数据", "text": "样本质量和分布"}, {"label": "训练", "text": "epoch、batch、学习率"}, {"label": "微调", "text": "loss mask 与 LoRA rank"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "记住三句话：梯度给方向；AdamW 自适应更新并解耦衰减；warmup 让训练先稳住。",
+      "visual": {"type": "summary", "points": ["梯度给更新方向", "AdamW 自适应并解耦衰减", "warmup 降低初期发散风险"]}
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "slug": "kv_cache",
+  "title": "KV Cache 机制",
+  "segments": [
+    {
+      "duration": 6.0,
+      "subtitle": "大模型生成文字时，为什么第一个字慢，后面却能一个一个往外吐？关键就在 KV Cache。",
+      "visual": {"type": "title", "headline": "为什么生成要缓存？", "subhead": "KV Cache = 避免重复计算历史 token"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "语言模型是自回归的：已经生成的词，会成为下一个词的上下文。",
+      "visual": {"type": "pipeline", "steps": ["用户问题", "生成第1词", "生成第2词", "继续生成"], "caption": "每一步都依赖前面所有 token"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "如果没有缓存，每生成一个新 token，都要把前面所有 token 的 Key 和 Value 重新算一遍。",
+      "visual": {"type": "compare", "items": [{"title": "无缓存", "body": "每一步重算整段历史"}, {"title": "问题", "body": "历史越长，重复越多"}]}
+    },
+    {
+      "duration": 8.5,
+      "subtitle": "KV Cache 的做法很朴素：以前 token 的 K 和 V 算过了，就放进缓存，下次直接拿来用。",
+      "visual": {"type": "cache", "before": ["我", "想", "学习"], "cache": ["K/V1", "K/V2", "K/V3"], "new": "新token", "caption": "只追加新 token 的 K/V"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "这里的 K 和 V，就是 Attention 里用来匹配和传递信息的那两部分。",
+      "visual": {"type": "formula", "formula": "Attention = softmax(QK^T) V", "items": [{"title": "Q", "body": "当前 token 的问题"}, {"title": "K", "body": "历史 token 的索引"}, {"title": "V", "body": "历史 token 的内容"}]}
+    },
+    {
+      "duration": 7.5,
+      "subtitle": "注意：缓存的是历史 token 的 K 和 V，不是 Q。新 token 来了，新的 Q 还是要现算。",
+      "visual": {"type": "trace", "items": [{"label": "缓存", "text": "历史 K / 历史 V"}, {"label": "现算", "text": "当前 token 的 Q"}, {"label": "输出", "text": "当前 token 读取历史信息"}]}
+    },
+    {
+      "duration": 8.5,
+      "subtitle": "第一次读完整个 prompt，叫 Prefill；后面每次只生成一个 token，叫 Decode。",
+      "visual": {"type": "compare", "items": [{"title": "Prefill", "body": "一次读完整段 prompt，可并行"}, {"title": "Decode", "body": "逐 token 生成，依赖缓存"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "KV Cache 省的是重复计算，但代价是显存。大小大致由层数、上下文长度、KV 头数和精度共同决定。",
+      "visual": {"type": "formula", "formula": "Cache ≈ layers x 2 x seq_len x kv_heads x head_dim x bytes", "items": [{"title": "2", "body": "K 和 V 两份"}, {"title": "seq_len", "body": "上下文越长越大"}, {"title": "kv_heads", "body": "KV 头越多越大"}]}
+    },
+    {
+      "duration": 7.5,
+      "subtitle": "所以缓存不是让注意力免费，而是把“重算历史”变成“读取历史缓存”。",
+      "visual": {"type": "compare", "items": [{"title": "省掉", "body": "重复计算历史 K/V"}, {"title": "仍要", "body": "读取缓存并做 attention"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "所以 MQA、GQA、PagedAttention 这些优化，本质都在想办法让 KV Cache 更省、更好管理。",
+      "visual": {"type": "pipeline", "steps": ["MHA", "MQA", "GQA", "PagedAttention"], "caption": "减少 KV 头或把缓存分页管理"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "记住三句话：KV Cache 缓存历史 K/V；新 token 现算 Q；Prefill 建缓存，Decode 读缓存并追加。",
+      "visual": {"type": "summary", "points": ["缓存历史 K/V", "新 token 现算 Q", "Prefill 建缓存，Decode 读缓存"]}
+    }
+  ]
+}

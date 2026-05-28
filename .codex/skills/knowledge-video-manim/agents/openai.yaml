@@ -1,0 +1,4 @@
+interface:
+  display_name: "Knowledge Video Manim"
+  short_description: "Build Manim explainer videos."
+  default_prompt: "Create a beginner-friendly Manim explainer video for this knowledge point, including script, narration, subtitles, rendered video, and iterative evaluation."

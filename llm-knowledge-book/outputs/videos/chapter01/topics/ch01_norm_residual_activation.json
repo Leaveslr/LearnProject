@@ -1,0 +1,61 @@
+{
+  "slug": "ch01_norm_residual_activation",
+  "title": "归一化、残差与激活函数",
+  "segments": [
+    {
+      "duration": 6.5,
+      "subtitle": "Transformer 不只有 Attention。Norm、Residual 和 Activation，决定深层模型能不能稳定训练。",
+      "visual": {"type": "title", "headline": "Attention 之外还有什么？", "subhead": "Norm + Residual + Activation"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "一个 Transformer block 里，常见链路是 Norm 到 Attention 再 Residual，接着 Norm 到 FFN 再 Residual。",
+      "visual": {"type": "pipeline", "steps": ["Norm", "Attention", "Residual", "Norm", "FFN"], "caption": "这些模块共同支撑深层训练"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "残差连接的形式很简单：输出等于输入加上子层计算结果。",
+      "visual": {"type": "formula", "formula": "output = x + Sublayer(x)", "items": [{"title": "x", "body": "原信息保留"}, {"title": "Sublayer", "body": "学习增量"}, {"title": "+", "body": "信息和梯度通路"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "有了残差，子层不用从零重写全部表示，只要学“在原输入上补什么”。",
+      "visual": {"type": "compare", "items": [{"title": "无残差", "body": "每层都要重建表示"}, {"title": "有残差", "body": "学习增量更容易"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "LayerNorm 对单个样本的 hidden dimension 做归一化，让每个 token 的表示尺度更稳定。",
+      "visual": {"type": "trace", "items": [{"label": "输入向量", "text": "尺度可能忽大忽小"}, {"label": "LayerNorm", "text": "按 hidden 维度归一化"}, {"label": "结果", "text": "优化更稳定"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "LLM 不常用 BatchNorm，因为 batch 统计在变长序列、自回归推理和小 batch 场景里不稳定。",
+      "visual": {"type": "compare", "items": [{"title": "BatchNorm", "body": "依赖 batch 统计"}, {"title": "LayerNorm", "body": "每个样本独立"}, {"title": "RMSNorm", "body": "更轻的尺度归一化"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "Pre-Norm 把 Norm 放在子层前面，现代 LLM 常用它，因为深层训练时梯度更容易传递。",
+      "visual": {"type": "formula", "formula": "x = x + Sublayer(Norm(x))", "items": [{"title": "Pre-Norm", "body": "先归一化再进子层"}, {"title": "优势", "body": "深层更稳定"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "激活函数提供非线性。没有激活，多层线性层叠在一起，表达能力仍然很有限。",
+      "visual": {"type": "compare", "items": [{"title": "ReLU/GELU", "body": "常见非线性"}, {"title": "SiLU", "body": "平滑激活"}, {"title": "SwiGLU", "body": "现代 LLM 常见门控 FFN"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "SwiGLU 可以理解为两条分支：一条产生内容，一条决定哪些内容放大或抑制。",
+      "visual": {"type": "pipeline", "steps": ["输入", "内容分支", "门控分支", "相乘", "输出"], "caption": "门控让 FFN 更会筛选特征"}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "最后别把结构当成口号。LayerNorm、RMSNorm、Pre-Norm 的选择，要看模型规模、稳定性和实现成本。",
+      "visual": {"type": "trace", "items": [{"label": "LayerNorm", "text": "经典稳定，计算略多"}, {"label": "RMSNorm", "text": "更轻量，现代 LLM 常见"}, {"label": "选择", "text": "看规模、稳定性和成本"}]}
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "记住三句话：Norm 稳定尺度；Residual 保留信息通路；Activation 提供非线性表达。",
+      "visual": {"type": "summary", "points": ["Norm 稳定尺度", "Residual 保留信息和梯度通路", "Activation 提供非线性"]}
+    }
+  ]
+}

@@ -15,11 +15,11 @@ description: Create beginner-friendly knowledge explainer videos with Manim, inc
 2. Write the segment script.
    - Keep each segment to 6-9 seconds and one cognitive action.
    - Use subtitle lines that can be read in one breath.
-   - Use the core structure: minimal concept map, one running example, mechanism walk-through, key details, counterfactual/boundary, judgment questions, three-sentence summary.
-   - Keep concept exposition short: about 15-20% of the video.
-   - Make one example carry the main teaching load: about 55-65% of the video.
-   - End with judgment questions, not memory questions: about 15-20% of the video.
-   - Require these sections: hook, minimal concept, one running example, core mechanism, concrete walk-through, boundary or caveat, judgment questions, three-sentence summary.
+   - Use the core structure: concept explanation, one worked example, one exercise/example problem, three-sentence summary.
+   - Keep concept exposition focused: about 20-25% of the video.
+   - Make one worked example carry the main teaching load: about 45-55% of the video.
+   - End with an exercise/example problem that is similar but not identical: about 20-30% of the video.
+   - Require these sections: hook, concept map, worked example, core mechanism, key details, boundary or caveat, exercise/example problem, three-sentence summary.
    - For formulas, translate every term into plain language on screen.
    - Add numeric intuition when it helps the learner judge magnitude, such as comparing P=0.90, P=0.30, and P=0.01.
 
@@ -38,8 +38,8 @@ description: Create beginner-friendly knowledge explainer videos with Manim, inc
    - Render a low-resolution preview first.
    - Extract 4-6 frames across the video and inspect text fit, overlap, visual clarity, and whether the frame is meaningful without audio.
    - Sample frames around likely segment boundaries; if several frames show only title/subtitle, shorten transition fades or lengthen visual holds before rendering the final version.
-   - Judge learning by transfer: the learner should be able to say what the concept is, what the key details are, and why the design choice is made.
-   - Require at least 2-3 judgment questions in the script. A video does not pass if the questions only test memorization.
+   - Judge learning by transfer: the learner should be able to say what the concept is, follow the worked example, and solve the exercise/example problem.
+   - A video does not pass if the exercise only tests memorization; it must require applying the same mechanism to a new small case.
    - Run at least two content-shape tests before trusting a reusable workflow: one mechanism/system topic and one workflow/Agent topic.
    - Iterate until the video is at least 90/100 or the remaining gap is explicitly production polish such as human voiceover.
 

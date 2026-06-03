@@ -1,0 +1,386 @@
+{
+  "slug": "cross_entropy_concept_example_exercise",
+  "title": "概念例子例题讲懂交叉熵",
+  "segments": [
+    {
+      "duration": 6.8,
+      "subtitle": "这条视频只讲清一件事：交叉熵到底是什么。先讲概念，再用一个例子把它讲明白。",
+      "visual": {
+        "type": "title",
+        "headline": "交叉熵：概念 -> 例子 -> 例题 -> 总结",
+        "subhead": "目标：知道它是什么，也能判断 loss 为什么变"
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "先讲概念：交叉熵不是模型结构，而是训练时的评分规则。它决定模型这一步该被扣多少分。",
+      "visual": {
+        "type": "compare",
+        "items": [
+          {
+            "title": "不是结构",
+            "body": "不是一层网络"
+          },
+          {
+            "title": "是规则",
+            "body": "预测后打分"
+          },
+          {
+            "title": "作用",
+            "body": "告诉模型错在哪"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "它解决的问题是：正确答案已经给出来了，模型却给了很多候选概率。我们要把这次预测变成一个分数。",
+      "visual": {
+        "type": "compare",
+        "items": [
+          {
+            "title": "已知答案",
+            "body": "正确 token"
+          },
+          {
+            "title": "模型预测",
+            "body": "一堆概率"
+          },
+          {
+            "title": "交叉熵",
+            "body": "把预测变成扣分"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.2,
+      "subtitle": "语言模型每一步不是只吐一个词，而是给词表里所有候选 token 分配概率。正确 token 的概率最关键。",
+      "visual": {
+        "type": "tokens",
+        "tokens": [
+          "前文",
+          "候选1",
+          "候选2",
+          "候选3",
+          "概率分布"
+        ],
+        "focus": 4,
+        "note": "next token prediction = 概率分布"
+      }
+    },
+    {
+      "duration": 7.2,
+      "subtitle": "这些概率来自 logits。模型先打原始分数，再用 softmax 把分数归一成概率。",
+      "visual": {
+        "type": "pipeline",
+        "steps": [
+          "hidden",
+          "lm_head",
+          "logits",
+          "softmax",
+          "概率"
+        ],
+        "caption": "logits 是分数，softmax 是归一"
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "公式只需要记住这个版本：Loss 等于负的 log 正确 token 概率。正确概率越高，扣分越低。",
+      "visual": {
+        "type": "formula",
+        "formula": "Loss = -log P(正确 token)",
+        "items": [
+          {
+            "title": "P 高",
+            "body": "loss 小"
+          },
+          {
+            "title": "P 低",
+            "body": "loss 大"
+          },
+          {
+            "title": "log",
+            "body": "放大低概率错误"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.2,
+      "subtitle": "现在跑例子：前文是“我今天很”，真实下一个 token 是“开心”。",
+      "visual": {
+        "type": "tokens",
+        "tokens": [
+          "我",
+          "今天",
+          "很",
+          "？"
+        ],
+        "focus": 3,
+        "note": "正确 token = 开心"
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "训练前，模型给“开心”的概率只有 0.30，还把不少概率分给了“难过”和“北京”。",
+      "visual": {
+        "type": "bars",
+        "items": [
+          {
+            "label": "开心",
+            "value": 30,
+            "text": "0.30"
+          },
+          {
+            "label": "难过",
+            "value": 25,
+            "text": "0.25"
+          },
+          {
+            "label": "北京",
+            "value": 20,
+            "text": "0.20"
+          },
+          {
+            "label": "睡觉",
+            "value": 15,
+            "text": "0.15"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "把 0.30 代进公式，loss 大约是 1.20。意思是：模型有点相信，但还不够相信。",
+      "visual": {
+        "type": "trace",
+        "items": [
+          {
+            "label": "P=0.30",
+            "text": "正确概率偏低"
+          },
+          {
+            "label": "loss≈1.20",
+            "text": "扣分中等偏大"
+          },
+          {
+            "label": "含义",
+            "text": "需要继续训练"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "反向传播后，训练会推动“开心”的 logit 上升，同时把抢概率的错误候选压下去。",
+      "visual": {
+        "type": "trace",
+        "items": [
+          {
+            "label": "开心",
+            "text": "logit 被推高"
+          },
+          {
+            "label": "错误项",
+            "text": "概率被挤下去"
+          },
+          {
+            "label": "目标",
+            "text": "正确 token 更可信"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "训练后，如果“开心”的概率升到 0.72，loss 就会明显下降。",
+      "visual": {
+        "type": "bars",
+        "items": [
+          {
+            "label": "开心",
+            "value": 72,
+            "text": "0.72"
+          },
+          {
+            "label": "难过",
+            "value": 12,
+            "text": "0.12"
+          },
+          {
+            "label": "北京",
+            "value": 3,
+            "text": "0.03"
+          },
+          {
+            "label": "睡觉",
+            "value": 6,
+            "text": "0.06"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "这里还有两个细节：一个 batch 会平均很多 token 的 loss；指令微调还会用 mask 决定哪些 token 参与扣分。",
+      "visual": {
+        "type": "compare",
+        "items": [
+          {
+            "title": "Batch loss",
+            "body": "多个 token 平均"
+          },
+          {
+            "title": "Loss mask",
+            "body": "决定谁被扣分"
+          },
+          {
+            "title": "SFT",
+            "body": "常只学助手回答"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "接下来做例题：前文换成“天气非常”，正确 token 是“好”。模型一开始给“好”的概率是 0.20。",
+      "visual": {
+        "type": "tokens",
+        "tokens": [
+          "天气",
+          "非常",
+          "？"
+        ],
+        "focus": 2,
+        "note": "例题：正确 token = 好，P=0.20"
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "请先判断：如果训练后 P(好) 从 0.20 升到 0.60，loss 会上升还是下降？",
+      "visual": {
+        "type": "compare",
+        "items": [
+          {
+            "title": "训练前",
+            "body": "P(好)=0.20"
+          },
+          {
+            "title": "训练后",
+            "body": "P(好)=0.60"
+          },
+          {
+            "title": "问题",
+            "body": "loss 怎么变？"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "答案是下降。因为交叉熵只看正确 token 的概率；0.60 比 0.20 更相信正确答案。",
+      "visual": {
+        "type": "trace",
+        "items": [
+          {
+            "label": "P 提高",
+            "text": "正确 token 更可信"
+          },
+          {
+            "label": "loss 下降",
+            "text": "扣分变小"
+          },
+          {
+            "label": "原因",
+            "text": "Loss = -log P(好)"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "带数字看更稳：P 等于 0.20 时 loss 约 1.61；P 等于 0.60 时 loss 约 0.51。",
+      "visual": {
+        "type": "trace",
+        "items": [
+          {
+            "label": "P=0.20",
+            "text": "loss≈1.61"
+          },
+          {
+            "label": "P=0.60",
+            "text": "loss≈0.51"
+          },
+          {
+            "label": "结论",
+            "text": "正确概率越高，扣分越低"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "再加一问：如果 SFT 里把用户问题也算进 loss，模型可能会学着复述用户，而不是只学习回答。",
+      "visual": {
+        "type": "trace",
+        "items": [
+          {
+            "label": "user",
+            "text": "应该主要做条件"
+          },
+          {
+            "label": "assistant",
+            "text": "应该承担训练目标"
+          },
+          {
+            "label": "mask 错",
+            "text": "会学错目标"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 7.4,
+      "subtitle": "所以你现在应该能判断三件事：P 正确提高，loss 降；mask 决定目标；PPL 低不代表任务一定成功。",
+      "visual": {
+        "type": "trace",
+        "items": [
+          {
+            "label": "概率",
+            "text": "正确概率越高，loss 越低"
+          },
+          {
+            "label": "mask",
+            "text": "决定哪些 token 被训练"
+          },
+          {
+            "label": "PPL",
+            "text": "低不等于任务一定成功"
+          }
+        ]
+      }
+    },
+    {
+      "duration": 8.0,
+      "subtitle": "最后总结：概念上，交叉熵是扣分规则；例子里，它推高正确 token；例题里，你要能判断 loss 为什么变。",
+      "visual": {
+        "type": "trace",
+        "items": [
+          {
+            "label": "概念",
+            "text": "交叉熵是训练扣分规则"
+          },
+          {
+            "label": "例子",
+            "text": "提高正确 token 概率"
+          },
+          {
+            "label": "例题",
+            "text": "换句子也能判断 loss"
+          }
+        ]
+      }
+    }
+  ]
+}

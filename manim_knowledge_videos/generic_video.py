@@ -201,7 +201,7 @@ class GenericKnowledgeVideo(Scene):
         for idx, item in enumerate(items):
             left = self.token(item["label"], COLORS[idx % len(COLORS)], width=2.15)
             right = Text(item["text"], font=FONT, font_size=25, color=INK)
-            right.set(width=7.6)
+            right.set(max_width=7.6)
             rows.add(VGroup(left, right).arrange(RIGHT, buff=0.38))
         rows.arrange(DOWN, buff=0.32, aligned_edge=LEFT).move_to(UP * 0.25)
         self.play(LaggedStart(*[FadeIn(row, shift=RIGHT * 0.18) for row in rows], lag_ratio=0.16), run_time=1.6)
@@ -211,8 +211,9 @@ class GenericKnowledgeVideo(Scene):
     def visual_summary(self, segment):
         points = VGroup()
         for idx, text in enumerate(segment["visual"]["points"], start=1):
-            item = Text(f"{idx}. {text}", font=FONT, font_size=33, color=COLORS[(idx - 1) % len(COLORS)])
+            item = Text(f"{idx}. {text}", font=FONT, font_size=28, color=COLORS[(idx - 1) % len(COLORS)], line_spacing=0.88)
+            item.set(max_width=10.6)
             points.add(item)
-        points.arrange(DOWN, buff=0.35, aligned_edge=LEFT).move_to(UP * 0.3)
+        points.arrange(DOWN, buff=0.42, aligned_edge=LEFT).move_to(UP * 0.3)
         self.play(LaggedStart(*[FadeIn(p, shift=RIGHT * 0.2) for p in points], lag_ratio=0.16), run_time=1.5)
         self.hold(segment, 1.5)

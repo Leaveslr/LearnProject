@@ -1,0 +1,13 @@
+id: factor-backtest-pitfalls
+domain: quant-finance
+version: 2026-06-12
+status: draft
+source_paths:
+  - knowledge-core/inbox/frontier-radar/quant-finance/2026-06-12-factor-backtest-raw.md
+  - knowledge-core/domains/quant-finance/04-strategies/factor-backtest-pitfalls.md
+intended_outputs:
+  - xiaohongshu-note
+  - short-video
+audience: beginner quant learners
+difficulty: beginner
+updated_at: 2026-06-12

@@ -2,10 +2,24 @@
 __pycache__/
 *.pyc
 
-# Generated video artifacts
+# Local editor state
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.ipynb_checkpoints/
+
+# Large or transient local exports
+exports/tmp/
+exports/**/*.log
+
+# Generated media belongs in content-production-studio or external storage
 *.mp4
+*.mov
 *.wav
 *.aiff
+*.mp3
 **/media/
 **/partial_movie_files/
+**/frames/
+**/final-frames/
+domains/llm-ai/llm-knowledge-book/outputs/videos/
 manim_knowledge_videos/outputs/**/frames*/
